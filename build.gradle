@@ -1,6 +1,8 @@
 apply plugin: 'java'
 apply plugin: 'eclipse'
 
+version = "0.2-SNAPSHOT"
+
 repositories {
      mavenCentral()
 }
@@ -22,10 +24,10 @@ sourceSets {
 
 // make an executable jar
 jar {
-  from "$buildDir/classes/main"
-  from { 
+  //from "$buildDir/classes/main"
+//  from { 
     // TODO: is there a way to include only required classes?
-    configurations.compile.collect { it.isDirectory() ? it : project.zipTree(it) }
-  }
+     // configurations.compile.collect { it.isDirectory() ? it : project.zipTree(it) }
+  //}
   manifest { attributes 'Main-Class': 'jbootweb.Main' }
 }
