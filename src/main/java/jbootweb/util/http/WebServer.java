@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Wrapper for the HTTP server embedded in the JDK.
@@ -27,6 +28,8 @@ public class WebServer implements Closeable {
   private ContentTypeProvider typeProvider = new DefaultContentTypeProvider();
 
   public WebServer(int port, ExecutorService pool) throws IOException {
+    if (pool == null)
+      pool = Executors.newCachedThreadPool();
     this.srv = HttpServer.create(new InetSocketAddress(port), 0);
     this.pool = pool;
     this.srv.setExecutor(pool);
@@ -94,8 +97,8 @@ public class WebServer implements Closeable {
    * sleep()). No problem with JDK 1.7.0_40.
    */
   public void close() {
-    this.pool.shutdownNow();
     this.srv.stop(0);
+    pool.shutdownNow();
   }
 
   public int getPort() {
