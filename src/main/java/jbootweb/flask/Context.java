@@ -1,0 +1,66 @@
+package jbootweb.flask;
+
+import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpHandler;
+
+import java.io.IOException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
+
+import jbootweb.util.Log;
+
+/**
+ * A HTTP handler that receives all requests on a given rootURI and dispatches
+ * them to configured route handlers.
+ *
+ * @author pcdv
+ */
+public class Context implements HttpHandler {
+
+  private final String rootURI;
+
+  private final List<MethodHandler> handlers = new ArrayList<>();
+
+  public Context(String rootURI) {
+    this.rootURI = rootURI;
+  }
+
+  /**
+   * Registers a java method that must be called to process requests matchinig
+   * specified URI (relative to rootURI).
+   *
+   * @param uri URI schema relative to rootURI (eg. "/:name")
+   * @param verb a HTTP method (GET, POST, ...)
+   * @param m a java method
+   * @param obj the object on which the method must be invoked
+   */
+  public void addHandler(String uri, String verb, Method m, Object obj) {
+    Log.debug("Add handler for " + verb + " on " + rootURI + uri);
+    handlers.add(new MethodHandler(uri, verb, m, obj));
+  }
+
+  public String getRootURI() {
+    return rootURI;
+  }
+
+  public void handle(HttpExchange r) throws IOException {
+    String uri = r.getRequestURI().toString().substring(rootURI.length());
+    try {
+      String[] tok = uri.substring(1).split("/");
+      for (MethodHandler h : handlers) {
+        if (h.handle(r, tok)) {
+          return;
+        }
+      }
+      r.sendResponseHeaders(404, 0);
+    }
+    catch (Exception ex) {
+      Log.error(ex, ex);
+      r.sendResponseHeaders(500, 0);
+    }
+    finally {
+      r.getResponseBody().close();
+    }
+  }
+}
