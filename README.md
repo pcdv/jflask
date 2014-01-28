@@ -1,9 +1,11 @@
 JBootWeb
 ========
 
-JBootWeb is a template project (i.e. you clone it and customize it) that
-generates an executable jar. The jar contains a HTTP server and minimal
-web framework thats runs the app.
+JBootWeb is both a template project (i.e. you clone it and customize it) 
+and a web framework inspired by [Flask](http://flask.pocoo.org/).
+
+The build generates an executable jar which contains a HTTP server and a
+small and customizable web framework thats serves the app.
 
 The generated application is minimal:
  - it uses the JDK's [integrated HTTP server](http://docs.oracle.com/javase/7/docs/jre/api/net/httpserver/spec/com/sun/net/httpserver/package-summary.html)
