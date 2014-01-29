@@ -36,6 +36,7 @@ public class RouteTest {
   @Before
   public void setUp() throws IOException {
     app = new App();
+    app.setPort(0);
     app.scan(this);
     app.start();
   }

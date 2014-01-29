@@ -25,6 +25,7 @@ public class RouteTestExtendsApp extends App {
 
   @Before
   public void setUp() throws IOException {
+    setPort(0); // use any port
     start();
   }
 
