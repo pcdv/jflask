@@ -23,19 +23,21 @@ public class RouteTest {
     return "Hello " + name;
   }
 
-  @Route(value = "/hello/:name/:surname")
+  @Route("/hello/:name/:surname")
   public String hello2(String name, String surname) {
     return "Hello " + name + " " + surname;
   }
 
-  @Route(value = "/db/hello/:name/stuff")
+  @Route("/db/hello/:name/stuff")
   public String hello3(String name) {
     return "Hello " + name;
   }
 
   @Before
-  public void setUp() {
+  public void setUp() throws IOException {
     app = new App();
+    app.scan(this);
+    app.start();
   }
 
   @After
@@ -45,9 +47,6 @@ public class RouteTest {
 
   @Test
   public void testHelloWorld() throws Exception {
-    app.scan(this);
-    app.start();
-
     assertEquals("Hello world", get("/hello/world"));
     assertEquals("Hello world 2", get("/hello/world/2"));
     assertEquals("Hello world", get("/db/hello/world/stuff"));
@@ -57,5 +56,4 @@ public class RouteTest {
     URL url = new URL("http://localhost:" + app.getPort() + path);
     return new String(IO.readFully(url.openStream()));
   }
-
 }

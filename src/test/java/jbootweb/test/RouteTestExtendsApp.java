@@ -13,6 +13,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+/**
+ * Example showing an extended App.
+ */
 public class RouteTestExtendsApp extends App {
 
   @Route(value = "/hello/:name")
@@ -39,5 +42,4 @@ public class RouteTestExtendsApp extends App {
     URL url = new URL("http://localhost:" + getPort() + path);
     return new String(IO.readFully(url.openStream()));
   }
-
 }
