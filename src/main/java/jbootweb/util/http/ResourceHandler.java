@@ -10,8 +10,8 @@ import java.io.InputStream;
  */
 public class ResourceHandler extends AbstractResourceHandler {
 
-  public ResourceHandler(WebServer srv, String rootURI, String localPath) {
-    super(srv, rootURI, localPath);
+  public ResourceHandler(ContentTypeProvider mime, String rootURI, String localPath) {
+    super(mime, rootURI, localPath);
   }
 
   @Override

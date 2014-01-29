@@ -74,15 +74,16 @@ public class WebServer implements Closeable {
    * system or nested in a jar from the classpath) from a given root URI.
    *
    * @param rootURI
-   * @param localPath NB: should end with a '/'
+   * @param path NB: should end with a '/'
    * @return this
    */
-  public WebServer servePath(final String rootURI, final String localPath) {
-    File file = new File(localPath);
+  public WebServer servePath(final String rootURI, final String path) {
+    File file = new File(path);
     if (file.exists() && file.isDirectory())
-      srv.createContext(rootURI, new FileHandler(this, rootURI, localPath));
+      srv.createContext(rootURI, new FileHandler(typeProvider, rootURI, path));
     else
-      srv.createContext(rootURI, new ResourceHandler(this, rootURI, localPath));
+      srv.createContext(rootURI, new ResourceHandler(typeProvider, rootURI,
+                                                     path));
     return this;
   }
 

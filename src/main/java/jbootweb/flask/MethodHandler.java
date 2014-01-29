@@ -38,6 +38,11 @@ public class MethodHandler {
 
     this.tok = uri.substring(1).split("/");
     this.idx = calcIndexes(tok);
+
+    // hack for being able to call method even if not public or if the class
+    // is not public
+    if (!m.isAccessible())
+      m.setAccessible(true);
   }
 
   private static int[] calcIndexes(String[] tok) {

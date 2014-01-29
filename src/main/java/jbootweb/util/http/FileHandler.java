@@ -6,8 +6,8 @@ import java.io.InputStream;
 
 public class FileHandler extends AbstractResourceHandler {
 
-  public FileHandler(WebServer srv, String rootURI, String localPath) {
-    super(srv, rootURI, localPath);
+  public FileHandler(ContentTypeProvider mime, String rootURI, String localPath) {
+    super(mime, rootURI, localPath);
   }
 
   @Override

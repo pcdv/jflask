@@ -20,10 +20,12 @@ public abstract class AbstractResourceHandler extends DefaultHandler {
 
   private final String localPath;
 
-  private final WebServer srv;
+  private final ContentTypeProvider mime;
 
-  public AbstractResourceHandler(WebServer srv, String rootURI, String localPath) {
-    this.srv = srv;
+  public AbstractResourceHandler(ContentTypeProvider mime,
+                                 String rootURI,
+                                 String localPath) {
+    this.mime = mime;
     this.rootURI = rootURI;
     this.localPath = localPath;
   }
@@ -40,7 +42,7 @@ public abstract class AbstractResourceHandler extends DefaultHandler {
 
     try {
       in = openPath(path);
-      String contentType = srv.getContentTypeProvider().getContentType(path);
+      String contentType = mime.getContentType(path);
       if (contentType != null)
         t.getResponseHeaders().add("Content-Type", contentType);
     }

@@ -1,12 +1,21 @@
 package jbootweb.flask;
 
+import com.sun.net.httpserver.HttpHandler;
+
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.ExecutorService;
 
 import jbootweb.util.Log;
+import jbootweb.util.http.AbstractResourceHandler;
+import jbootweb.util.http.ContentTypeProvider;
+import jbootweb.util.http.DefaultContentTypeProvider;
+import jbootweb.util.http.FileHandler;
+import jbootweb.util.http.ResourceHandler;
 import jbootweb.util.http.WebServer;
 
 /**
@@ -51,7 +60,9 @@ public class App {
 
   private WebServer srv;
 
-  private final Map<String, Context> contexts = new Hashtable<>();
+  private final Map<String, HttpHandler> handlers = new Hashtable<>();
+
+  private ContentTypeProvider mime = new DefaultContentTypeProvider();
 
   public App() {
     // in case we are extended by a subclass with annotations
@@ -117,21 +128,29 @@ public class App {
    * Gets or creates a Context for specified root URI.
    */
   private Context getContext(String rootURI) {
-    Context c = contexts.get(rootURI);
+    HttpHandler c = handlers.get(rootURI);
+
     if (c == null) {
       Log.info("Creating context for " + rootURI);
-      contexts.put(rootURI, c = new Context(rootURI));
+      handlers.put(rootURI, c = new Context(rootURI));
     }
-    return c;
+    else if (!(c instanceof Context))
+      throw new IllegalStateException("A handler is already registered for: "
+                                      + rootURI);
+    return (Context) c;
   }
 
   public void start() throws IOException {
     srv = new WebServer(port, pool);
-    for (Context c : contexts.values())
-      srv.addHandler(c.getRootURI(), c);
+    srv.setContentTypeProvider(mime);
+    for (Entry<String, HttpHandler> e : handlers.entrySet())
+      srv.addHandler(e.getKey(), e.getValue());
   }
 
   public int getPort() {
+    // retrieves the actual port even if port 0 was given (for testing)
+    if (srv != null)
+      return srv.getPort();
     return port;
   }
 
@@ -139,4 +158,31 @@ public class App {
     srv.close();
   }
 
+  /**
+   * Serves the contents of a given path (which may be a directory on the file
+   * system or nested in a jar from the classpath) from a given root URI.
+   *
+   * @param rootURI
+   * @param localPath NB: should end with a '/'
+   * @return
+   * @return this
+   */
+  public App servePath(String rootURI, String path) {
+    File file = new File(path);
+    AbstractResourceHandler h;
+    if (file.exists() && file.isDirectory())
+      h = new FileHandler(mime, rootURI, path);
+    else
+      h = new ResourceHandler(mime, rootURI, path);
+
+    handlers.put(rootURI, h);
+    if (srv != null)
+      srv.addHandler(rootURI, h);
+
+    return this;
+  }
+
+  public void setContentTypeProvider(ContentTypeProvider mime) {
+    this.mime = mime;
+  }
 }
