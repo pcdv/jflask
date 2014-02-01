@@ -18,12 +18,12 @@ import org.junit.Test;
  */
 public class RouteTestExtendsApp extends App {
 
-  @Route(value = "/hello/:name")
+  @Route("/hello/:name")
   public String hello(String name) {
     return "Hello " + name;
   }
 
-  @Route(value = "/hello/foo/*bar")
+  @Route("/hello/foo/*bar")
   public String helloSplat(String bar) {
     return "Hello " + bar;
   }
