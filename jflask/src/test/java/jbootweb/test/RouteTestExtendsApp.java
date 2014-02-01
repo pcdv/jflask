@@ -23,9 +23,14 @@ public class RouteTestExtendsApp extends App {
     return "Hello " + name;
   }
 
+  @Route(value = "/hello/foo/*bar")
+  public String helloSplat(String bar) {
+    return "Hello " + bar;
+  }
+
   @Before
   public void setUp() throws IOException {
-    setPort(0); // use any port
+    setPort(0); // use any available port instead of 8080
     start();
   }
 
@@ -37,6 +42,16 @@ public class RouteTestExtendsApp extends App {
   @Test
   public void testHelloWorld() throws Exception {
     assertEquals("Hello world", get("/hello/world"));
+  }
+
+  @Test
+  public void testHelloSplat() throws Exception {
+    assertEquals("Hello a/b/c", get("/hello/foo/a/b/c"));
+  }
+
+  @Test
+  public void testHelloSplat1() throws Exception {
+    assertEquals("Hello a", get("/hello/foo/a"));
   }
 
   private String get(String path) throws Exception {

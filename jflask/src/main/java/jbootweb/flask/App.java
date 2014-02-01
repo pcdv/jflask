@@ -112,7 +112,7 @@ public class App {
     for (; i < tok.length; i++) {
       if (tok[i].isEmpty())
         continue;
-      if (tok[i].startsWith(":"))
+      if (tok[i].startsWith(":") || tok[i].startsWith("*"))
         break;
       root.append('/').append(tok[i]);
     }
