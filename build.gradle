@@ -1,33 +1,20 @@
-apply plugin: 'java'
-apply plugin: 'eclipse'
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'eclipse'
 
-version = "0.2-SNAPSHOT"
+    version = "0.2-SNAPSHOT"
 
-repositories {
-     mavenCentral()
-}
-
-dependencies {
-    testCompile "junit:junit:4.11"
-}
-
-// consider app as resource so it is automatically included in jar and copied
-// in classes dir (allows to run the server from the project dir)
-sourceSets {
-  main {
-    resources {
-      srcDir projectDir
-      include 'app/**'
+    repositories {
+         mavenCentral()
     }
-  }
-}
 
-// make an executable jar
-jar {
-  //from "$buildDir/classes/main"
-//  from { 
-    // TODO: is there a way to include only required classes?
-     // configurations.compile.collect { it.isDirectory() ? it : project.zipTree(it) }
-  //}
-  manifest { attributes 'Main-Class': 'jbootweb.Main' }
+    dependencies {
+        testCompile "junit:junit:4.11"
+    }
+
+    eclipse {
+      classpath {
+        defaultOutputDir = file('classes')
+      }
+    }
 }
