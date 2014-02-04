@@ -64,7 +64,7 @@ public class App {
 
   private ContentTypeProvider mime = new DefaultContentTypeProvider();
 
-  private final ThreadLocal<Request> localRequest = new ThreadLocal<Request>();
+  private final ThreadLocal<SunRequest> localRequest = new ThreadLocal<SunRequest>();
 
   public App() {
     // in case we are extended by a subclass with annotations
@@ -188,11 +188,15 @@ public class App {
     this.mime = mime;
   }
 
-  void setThreadLocalRequest(Request req) {
+  void setThreadLocalRequest(SunRequest req) {
     localRequest.set(req);
   }
 
   public Request getRequest() {
+    return localRequest.get();
+  }
+
+  public Response getResponse() {
     return localRequest.get();
   }
 }

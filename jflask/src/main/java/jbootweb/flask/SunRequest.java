@@ -4,7 +4,7 @@ import com.sun.net.httpserver.HttpExchange;
 
 import java.util.List;
 
-public class SunRequest implements Request {
+public class SunRequest implements Request, Response {
 
   private final HttpExchange exch;
 
@@ -41,8 +41,12 @@ public class SunRequest implements Request {
   }
 
   public List<String> getArgs(String name) {
-
+    // TODO
     return null;
+  }
+
+  public void add(String header, String value) {
+    exch.getResponseHeaders().add(header, value);
   }
 
 }
