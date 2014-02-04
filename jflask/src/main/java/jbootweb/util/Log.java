@@ -2,7 +2,7 @@ package jbootweb.util;
 
 public class Log {
 
-  public static final boolean DEBUG = Options.DEBUG;
+  public static final boolean DEBUG = Boolean.getBoolean("debug");
 
   public static void warn(Object msg) {
     System.err.println("WARN: " + msg);

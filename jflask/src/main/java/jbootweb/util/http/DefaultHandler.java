@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.PrintStream;
 
 import jbootweb.util.Log;
-import jbootweb.util.Options;
 
 public class DefaultHandler implements HttpHandler {
 
@@ -19,7 +18,7 @@ public class DefaultHandler implements HttpHandler {
       Log.error("Error occurred", t);
       r.sendResponseHeaders(500, 0);
       r.getResponseBody().write("Internal Server Error".getBytes());
-      if (Options.DEBUG)
+      if (Log.DEBUG)
         t.printStackTrace(new PrintStream(r.getResponseBody()));
     }
     finally {
