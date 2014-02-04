@@ -4,6 +4,7 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
 import java.io.IOException;
+import java.io.PrintStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -54,7 +55,7 @@ public class Context implements HttpHandler {
     app.setThreadLocalRequest(req);
     String uri = req.getRequestURI().substring(rootURI.length());
     try {
-      String[] tok = uri.isEmpty() ? EMPTY: uri.substring(1).split("/");
+      String[] tok = uri.isEmpty() ? EMPTY : uri.substring(1).split("/");
       for (MethodHandler h : handlers) {
         if (h.handle(r, tok)) {
           return;
@@ -65,6 +66,9 @@ public class Context implements HttpHandler {
     catch (Exception ex) {
       Log.error(ex, ex);
       r.sendResponseHeaders(500, 0);
+      if (app.isDebugEnabled()) {
+        ex.printStackTrace(new PrintStream(r.getResponseBody()));
+      }
     }
     finally {
       r.getResponseBody().close();

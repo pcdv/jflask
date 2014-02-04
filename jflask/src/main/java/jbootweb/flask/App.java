@@ -199,4 +199,12 @@ public class App {
   public Response getResponse() {
     return localRequest.get();
   }
+
+  /**
+   * Returns true if in DEBUG mode. When in debug mode, server stack traces
+   * are sent to clients as body of the 500 response.
+   */
+  public boolean isDebugEnabled() {
+    return Log.DEBUG;
+  }
 }
