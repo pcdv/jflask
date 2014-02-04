@@ -18,11 +18,16 @@ import jbootweb.util.Log;
  */
 public class Context implements HttpHandler {
 
+  private static final String[] EMPTY = {};
+
   private final String rootURI;
 
   private final List<MethodHandler> handlers = new ArrayList<>();
 
-  public Context(String rootURI) {
+  private final App app;
+
+  public Context(App app, String rootURI) {
+    this.app = app;
     this.rootURI = rootURI;
   }
 
@@ -45,9 +50,11 @@ public class Context implements HttpHandler {
   }
 
   public void handle(HttpExchange r) throws IOException {
-    String uri = r.getRequestURI().toString().substring(rootURI.length());
+    SunRequest req = new SunRequest(r);
+    app.setThreadLocalRequest(req);
+    String uri = req.getRequestURI().substring(rootURI.length());
     try {
-      String[] tok = uri.substring(1).split("/");
+      String[] tok = uri.isEmpty() ? EMPTY: uri.substring(1).split("/");
       for (MethodHandler h : handlers) {
         if (h.handle(r, tok)) {
           return;

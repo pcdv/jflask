@@ -1,22 +1,11 @@
 package jbootweb.test;
 
 import static org.junit.Assert.*;
-
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-
-import jbootweb.flask.App;
 import jbootweb.flask.Route;
-import jbootweb.util.IO;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
-public class RouteTest {
-
-  private App app;
+public class RouteTest extends AbstractAppTest {
 
   @Route(value = "/hello/:name", method = "GET")
   public String hello(String name) {
@@ -33,28 +22,10 @@ public class RouteTest {
     return "Hello " + name;
   }
 
-  @Before
-  public void setUp() throws IOException {
-    app = new App();
-    app.setPort(0);
-    app.scan(this);
-    app.start();
-  }
-
-  @After
-  public void tearDown() {
-    app.destroy();
-  }
-
   @Test
   public void testHelloWorld() throws Exception {
     assertEquals("Hello world", get("/hello/world"));
     assertEquals("Hello world 2", get("/hello/world/2"));
     assertEquals("Hello world", get("/db/hello/world/stuff"));
-  }
-
-  private String get(String path) throws MalformedURLException, IOException {
-    URL url = new URL("http://localhost:" + app.getPort() + path);
-    return new String(IO.readFully(url.openStream()));
   }
 }

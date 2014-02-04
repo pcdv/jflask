@@ -13,6 +13,8 @@ import java.util.Arrays;
  */
 public class MethodHandler {
 
+  private static final String[] EMPTY = {};
+
   /** HTTP method */
   private final String verb;
 
@@ -41,7 +43,7 @@ public class MethodHandler {
     this.m = m;
     this.obj = obj;
 
-    this.tok = uri.substring(1).split("/");
+    this.tok = uri.isEmpty() ? EMPTY :uri.substring(1).split("/");
     this.idx = calcIndexes(tok);
 
     // hack for being able to call method even if not public or if the class

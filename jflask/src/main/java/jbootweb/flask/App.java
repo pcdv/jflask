@@ -64,6 +64,8 @@ public class App {
 
   private ContentTypeProvider mime = new DefaultContentTypeProvider();
 
+  private final ThreadLocal<Request> localRequest = new ThreadLocal<Request>();
+
   public App() {
     // in case we are extended by a subclass with annotations
     scan(this);
@@ -132,7 +134,7 @@ public class App {
 
     if (c == null) {
       Log.info("Creating context for " + rootURI);
-      handlers.put(rootURI, c = new Context(rootURI));
+      handlers.put(rootURI, c = new Context(this, rootURI));
     }
     else if (!(c instanceof Context))
       throw new IllegalStateException("A handler is already registered for: "
@@ -184,5 +186,13 @@ public class App {
 
   public void setContentTypeProvider(ContentTypeProvider mime) {
     this.mime = mime;
+  }
+
+  void setThreadLocalRequest(Request req) {
+    localRequest.set(req);
+  }
+
+  public Request getRequest() {
+    return localRequest.get();
   }
 }
