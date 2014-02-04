@@ -2,7 +2,9 @@ subprojects {
     apply plugin: 'java'
     apply plugin: 'eclipse'
 
-    version = "0.2-SNAPSHOT"
+    project.sourceCompatibility = targetCompatibility = 1.7
+
+    version = "0.3-SNAPSHOT"
 
     repositories {
          mavenCentral()
