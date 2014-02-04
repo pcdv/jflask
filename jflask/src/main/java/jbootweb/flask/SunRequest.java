@@ -2,6 +2,7 @@ package jbootweb.flask;
 
 import com.sun.net.httpserver.HttpExchange;
 
+import java.io.InputStream;
 import java.util.List;
 
 public class SunRequest implements Request, Response {
@@ -44,6 +45,12 @@ public class SunRequest implements Request, Response {
     // TODO
     return null;
   }
+
+  public InputStream getInputStream() {
+    return exch.getRequestBody();
+  }
+
+  ///////////// Response methods
 
   public void add(String header, String value) {
     exch.getResponseHeaders().add(header, value);

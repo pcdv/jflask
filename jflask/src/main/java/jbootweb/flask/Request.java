@@ -1,5 +1,6 @@
 package jbootweb.flask;
 
+import java.io.InputStream;
 import java.util.List;
 
 public interface Request {
@@ -38,4 +39,6 @@ public interface Request {
    * @param name the parameter's name
    */
   List<String> getArgs(String name);
+
+  InputStream getInputStream();
 }
