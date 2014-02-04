@@ -19,6 +19,11 @@ public class QueryTest extends AbstractAppTest {
     return "Hello " + app.getRequest().getArg("name", null);
   }
 
+  @Route("/hello_bytearray")
+  public byte[] helloByteArray() {
+    return ("Hello " + app.getRequest().getArg("name", null)).getBytes();
+  }
+
   @Test
   public void testTrimQS() throws Exception {
     assertEquals("Hello world", get("/hello/world?foo=bar"));
@@ -33,6 +38,11 @@ public class QueryTest extends AbstractAppTest {
   @Ignore
   public void testGetArgSlash() throws Exception {
     assertEquals("Hello world", get("/hello2/?name=world"));
+  }
+
+  @Test
+  public void testReturnByteArray() throws Exception {
+    assertEquals("Hello world", get("/hello_bytearray?name=world"));
   }
 
 }
