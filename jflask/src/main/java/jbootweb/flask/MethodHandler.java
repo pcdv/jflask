@@ -5,6 +5,8 @@ import com.sun.net.httpserver.HttpExchange;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
+import jbootweb.util.Log;
+
 /**
  * Handles a request submitted by the Context, if compatible with the HTTP
  * method and URI schema.
@@ -43,13 +45,19 @@ public class MethodHandler {
     this.m = m;
     this.obj = obj;
 
-    this.tok = uri.isEmpty() ? EMPTY :uri.substring(1).split("/");
+    this.tok = uri.isEmpty() ? EMPTY : uri.substring(1).split("/");
     this.idx = calcIndexes(tok);
 
     // hack for being able to call method even if not public or if the class
     // is not public
     if (!m.isAccessible())
       m.setAccessible(true);
+
+    for (Class<?> c : m.getParameterTypes()) {
+      if (c != String.class)
+        throw new RuntimeException//
+        ("Only String supported in method arguments (for now): " + m);
+    }
   }
 
   private int[] calcIndexes(String[] tok) {
@@ -81,7 +89,9 @@ public class MethodHandler {
     }
 
     for (int i = 0; i < tok.length; i++) {
-      if (tok[i].charAt(0) != ':' && tok[i].charAt(0) != '*' && !tok[i].equals(uri[i]))
+      if (tok[i].charAt(0) != ':'
+          && tok[i].charAt(0) != '*'
+          && !tok[i].equals(uri[i]))
         return false;
     }
 
@@ -95,9 +105,18 @@ public class MethodHandler {
       }
     }
 
-    String s = (String) m.invoke(obj, args);
-    r.sendResponseHeaders(200, 0);
-    r.getResponseBody().write(s.getBytes("UTF-8"));
+    if (Log.DEBUG)
+      Log.debug("Invoking " + m + " with " + Arrays.toString(args));
+
+    Object res = m.invoke(obj, args);
+    if (res instanceof String) {
+      r.sendResponseHeaders(200, 0);
+      r.getResponseBody().write(((String) res).getBytes("UTF-8"));
+    }
+    else if (res instanceof byte[]) {
+      r.sendResponseHeaders(200, 0);
+      r.getResponseBody().write((byte[]) res);
+    }
 
     return true;
   }
