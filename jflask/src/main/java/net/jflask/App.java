@@ -20,7 +20,10 @@ import net.jflask.util.Log;
 
 /**
  * Encapsulates the server side of a web app: an HTTP server and some route
- * handlers.
+ * handlers. There must be only one instance of App in the application. If some
+ * route handlers are defined in an external class (i.e. not extending the main
+ * App), {@link #scan(Object)} must be called in order to detect them in an
+ * instance of the class.
  * <p>
  * The App can be extended with some handlers:
  *
@@ -201,8 +204,8 @@ public class App {
   }
 
   /**
-   * Returns true if in DEBUG mode. When in debug mode, server stack traces
-   * are sent to clients as body of the 500 response.
+   * Returns true if in DEBUG mode. When in debug mode, server stack traces are
+   * sent to clients as body of the 500 response.
    */
   public boolean isDebugEnabled() {
     return Log.DEBUG;

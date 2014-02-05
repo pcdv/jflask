@@ -8,8 +8,18 @@ import java.lang.annotation.Target;
 /**
  * The Route annotation binds a method with a route so that it is automatically
  * invoked when a request is submitted with a compatible URI and HTTP method.
+ * <p>
+ * Notes:
+ * <ul>
+ * <li>As of v0.3, decorated methods must return either <code>String</code> or
+ * <code>byte[]</code>.
+ * <li>to register decorated methods into the App, {@link App#scan(Object)}
+ * must be called with an instance of the class containing the method. This
+ * step is not necessary if the method exists in a class extending
+ * <code>App</code>.
  *
  * @author pcdv
+ * @see App
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
@@ -46,15 +56,6 @@ public @interface Route {
    *   return Files.readAllBytes(root.resolve(path));
    * }
    * </pre>
-   * <p>
-   * Notes:
-   * <ul>
-   * <li>As of v0.3, decorated methods must return either <code>String</code>
-   * or <code>byte[]</code>.
-   * <li>to register decorated methods into the App, {@link App#scan(Object)}
-   * must be called with an instance of the class containing the method. This
-   * step is not necessary if the method exists in a class extending
-   * <code>App</code>.
    */
   String value();
 
