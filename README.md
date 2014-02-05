@@ -41,7 +41,9 @@ Features
  - Flask-like request routing (with method annotations)
  - Easy standalone jar generation (executable with`java -jar mywebapp.jar`)
 
+Requirements
+------------
+ - JRE 7
 
-----------
 
 
