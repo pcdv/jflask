@@ -47,8 +47,14 @@ public @interface Route {
    * }
    * </pre>
    * <p>
-   * As of v0.3, decorated methods must return either <code>String</code> or
-   * <code>byte[]</code>.
+   * Notes:
+   * <ul>
+   * <li>As of v0.3, decorated methods must return either <code>String</code>
+   * or <code>byte[]</code>.
+   * <li>to register decorated methods into the App, {@link App#scan(Object)}
+   * must be called with an instance of the class containing the method. This
+   * step is not necessary if the method exists in a class extending
+   * <code>App</code>.
    */
   String value();
 
