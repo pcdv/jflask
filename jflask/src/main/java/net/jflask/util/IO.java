@@ -1,4 +1,4 @@
-package jbootweb.util;
+package net.jflask.util;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

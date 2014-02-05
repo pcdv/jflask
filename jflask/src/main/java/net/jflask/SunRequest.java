@@ -1,4 +1,4 @@
-package jbootweb.flask;
+package net.jflask;
 
 import com.sun.net.httpserver.HttpExchange;
 

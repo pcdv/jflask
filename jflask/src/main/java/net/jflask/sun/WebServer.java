@@ -1,4 +1,4 @@
-package jbootweb.util.http;
+package net.jflask.sun;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;

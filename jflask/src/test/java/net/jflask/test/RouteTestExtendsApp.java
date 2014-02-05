@@ -1,13 +1,13 @@
-package jbootweb.test;
+package net.jflask.test;
 
 import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.net.URL;
 
-import jbootweb.flask.App;
-import jbootweb.flask.Route;
-import jbootweb.util.IO;
+import net.jflask.App;
+import net.jflask.Route;
+import net.jflask.util.IO;
 
 import org.junit.After;
 import org.junit.Before;

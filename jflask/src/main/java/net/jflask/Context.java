@@ -1,4 +1,4 @@
-package jbootweb.flask;
+package net.jflask;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -9,7 +9,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-import jbootweb.util.Log;
+import net.jflask.util.Log;
 
 /**
  * A HTTP handler that receives all requests on a given rootURI and dispatches

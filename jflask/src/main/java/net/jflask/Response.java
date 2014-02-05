@@ -1,4 +1,4 @@
-package jbootweb.flask;
+package net.jflask;
 
 public interface Response {
 

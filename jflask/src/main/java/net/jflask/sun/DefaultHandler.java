@@ -1,4 +1,4 @@
-package jbootweb.util.http;
+package net.jflask.sun;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -6,7 +6,7 @@ import com.sun.net.httpserver.HttpHandler;
 import java.io.IOException;
 import java.io.PrintStream;
 
-import jbootweb.util.Log;
+import net.jflask.util.Log;
 
 public class DefaultHandler implements HttpHandler {
 

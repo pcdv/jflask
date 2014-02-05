@@ -1,12 +1,12 @@
-package jbootweb.util.http;
+package net.jflask.sun;
 
 import com.sun.net.httpserver.HttpExchange;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 
-import jbootweb.util.IO;
-import jbootweb.util.Log;
+import net.jflask.util.IO;
+import net.jflask.util.Log;
 
 /**
  * Abstract handler that Serves resources found either in the file system or

@@ -1,11 +1,10 @@
-package jbootweb.test;
+package net.jflask.test;
 
 import static org.junit.Assert.*;
+import net.jflask.Route;
 
 import org.junit.Ignore;
 import org.junit.Test;
-
-import jbootweb.flask.Route;
 
 public class QueryTest extends AbstractAppTest {
 

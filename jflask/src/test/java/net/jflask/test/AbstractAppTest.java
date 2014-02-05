@@ -1,11 +1,11 @@
-package jbootweb.test;
+package net.jflask.test;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import jbootweb.flask.App;
-import jbootweb.util.IO;
+import net.jflask.App;
+import net.jflask.util.IO;
 
 import org.junit.After;
 import org.junit.Before;

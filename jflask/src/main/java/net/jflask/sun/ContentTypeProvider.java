@@ -1,4 +1,4 @@
-package jbootweb.util.http;
+package net.jflask.sun;
 
 public interface ContentTypeProvider {
 

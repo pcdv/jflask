@@ -1,4 +1,4 @@
-package jbootweb.flask;
+package net.jflask;
 
 import com.sun.net.httpserver.HttpHandler;
 
@@ -10,13 +10,13 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ExecutorService;
 
-import jbootweb.util.Log;
-import jbootweb.util.http.AbstractResourceHandler;
-import jbootweb.util.http.ContentTypeProvider;
-import jbootweb.util.http.DefaultContentTypeProvider;
-import jbootweb.util.http.FileHandler;
-import jbootweb.util.http.ResourceHandler;
-import jbootweb.util.http.WebServer;
+import net.jflask.sun.AbstractResourceHandler;
+import net.jflask.sun.ContentTypeProvider;
+import net.jflask.sun.DefaultContentTypeProvider;
+import net.jflask.sun.FileHandler;
+import net.jflask.sun.ResourceHandler;
+import net.jflask.sun.WebServer;
+import net.jflask.util.Log;
 
 /**
  * Encapsulates the server side of a web app: an HTTP server and some route

@@ -1,4 +1,4 @@
-package jbootweb.flask;
+package net.jflask;
 
 import java.io.InputStream;
 import java.util.List;

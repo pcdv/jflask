@@ -1,11 +1,11 @@
-package jbootweb.flask;
+package net.jflask;
 
 import com.sun.net.httpserver.HttpExchange;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
-import jbootweb.util.Log;
+import net.jflask.util.Log;
 
 /**
  * Handles a request submitted by the Context, if compatible with the HTTP

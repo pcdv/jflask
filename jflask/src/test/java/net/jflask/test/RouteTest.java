@@ -1,7 +1,7 @@
-package jbootweb.test;
+package net.jflask.test;
 
 import static org.junit.Assert.*;
-import jbootweb.flask.Route;
+import net.jflask.Route;
 
 import org.junit.Test;
 

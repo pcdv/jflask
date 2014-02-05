@@ -1,21 +1,20 @@
-
-
 import java.io.IOException;
 
-import jbootweb.flask.App;
-import jbootweb.flask.Route;
-import jbootweb.util.http.WebServer;
+import net.jflask.App;
+import net.jflask.Route;
 
 public class Main {
 
   /**
-   * Old example.
-  public static void main2(String[] args) throws IOException {
-    @SuppressWarnings("resource")
-    WebServer ws = new WebServer(Options.PORT, null);
-    ws.servePath("/", "app/");
-    System.out.println("Listening on http://0.0.0.0:" + ws.getPort());
-  }
+   * Old example not using jflask.
+   *
+   * <pre>
+   *   public static void main2(String[] args) throws IOException {
+   *     @SuppressWarnings("resource")
+   *     WebServer ws = new WebServer(Options.PORT, null);
+   *     ws.servePath("/", "app/");
+   *     System.out.println("Listening on http://0.0.0.0:" + ws.getPort());
+   * }
    */
 
   /**

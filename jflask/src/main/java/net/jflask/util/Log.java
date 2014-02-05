@@ -1,4 +1,4 @@
-package jbootweb.util;
+package net.jflask.util;
 
 public class Log {
 

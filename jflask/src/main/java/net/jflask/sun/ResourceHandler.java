@@ -1,4 +1,4 @@
-package jbootweb.util.http;
+package net.jflask.sun;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
