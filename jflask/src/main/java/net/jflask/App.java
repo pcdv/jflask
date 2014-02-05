@@ -110,7 +110,8 @@ public class App {
     String[] tok = route.split("/+");
 
     // split the static and dynamic part of the route (i.e. /app/hello/:name =>
-    // "/app/hello" + "/:name")
+    // "/app/hello" + "/:name"). The static part is used to get or create a
+    // Context, the dynamic part is used to add a handler in the Context.
     StringBuilder root = new StringBuilder(80);
     StringBuilder rest = new StringBuilder(80);
     int i = 0;
@@ -136,7 +137,7 @@ public class App {
     HttpHandler c = handlers.get(rootURI);
 
     if (c == null) {
-      Log.info("Creating context for " + rootURI);
+      Log.debug("Creating context for " + rootURI);
       handlers.put(rootURI, c = new Context(this, rootURI));
     }
     else if (!(c instanceof Context))
