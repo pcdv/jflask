@@ -7,7 +7,7 @@ JFlask is a micro web framework for Java inspired by [Flask](http://flask.pocoo.
 
 
 Here is an example of what a small JFlask web app looks like.
-```
+```java
 package samples;
 
 import net.jflask.App;
