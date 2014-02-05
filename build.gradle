@@ -5,7 +5,7 @@ subprojects {
 
     project.sourceCompatibility = targetCompatibility = 1.7
 
-    version = "0.3"
+    version = "0.4-SNAPSHOT"
 
     repositories {
          mavenCentral()
@@ -21,3 +21,22 @@ subprojects {
       }
     }
 }
+
+project(':jflask') {
+  apply plugin: 'ivy-publish'
+
+  publishing {
+    repositories {
+      ivy {
+        url "../../jflask-ivy-repo"
+      }
+    }
+    publications {
+      ivy(IvyPublication) {
+        organisation "net.jflask"
+        from components.java
+      }
+    }
+  }
+}
+
