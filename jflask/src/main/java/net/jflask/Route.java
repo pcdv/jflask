@@ -5,12 +5,56 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * The Route annotation binds a method with a route so that it is automatically
+ * invoked when a request is submitted with a compatible URI and HTTP method.
+ *
+ * @author pcdv
+ */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Route {
 
+  /**
+   * Specifies the route. Format can be:
+   * <p>
+   * <b>static</b>
+   *
+   * <pre>
+   * &#064;Route(&quot;/foo/bar&quot;)
+   * public void fooBar() {
+   *   return &quot;...&quot;;
+   * }
+   * </pre>
+   *
+   * <b>variable</b>
+   *
+   * <pre>
+   * &#064;Route(&quot;/hello/:name&quot;)
+   * public void hello(String name) {
+   *   return &quot;Hello &quot; + name;
+   * }
+   * </pre>
+   *
+   * <b>ending with a "splat"</b>
+   *
+   * <pre>
+   * &#064;Route(&quot;/file/*path&quot;)
+   * public byte[] getFile(String path) throws IOException {
+   *   if (path.contains(&quot;..&quot;))
+   *     throw new IllegalArgumentException(&quot;Invalid path&quot;);
+   *   return Files.readAllBytes(root.resolve(path));
+   * }
+   * </pre>
+   * <p>
+   * As of v0.3, decorated methods must return either <code>String</code> or
+   * <code>byte[]</code>.
+   */
   String value();
 
+  /**
+   * Specifies the HTTP method. Defaults to "GET".
+   */
   String method() default "GET";
 
 }
