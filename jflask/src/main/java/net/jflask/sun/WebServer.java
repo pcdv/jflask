@@ -1,11 +1,8 @@
 package net.jflask.sun;
 
-import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 
-import java.io.Closeable;
-import java.io.File;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.concurrent.ExecutorService;
@@ -19,13 +16,11 @@ import java.util.concurrent.Executors;
  *      for HTTPServer</a>
  * @author pcdv
  */
-public class WebServer implements Closeable {
+public class WebServer  {
 
   private final HttpServer srv;
 
   private final ExecutorService pool;
-
-  private ContentTypeProvider typeProvider = new DefaultContentTypeProvider();
 
   public WebServer(int port, ExecutorService pool) throws IOException {
     if (pool == null)
@@ -41,56 +36,6 @@ public class WebServer implements Closeable {
     return this;
   }
 
-  public void serveStatic(String path, final byte[] data) {
-    this.srv.createContext(path, new HttpHandler() {
-      public void handle(HttpExchange t) throws IOException {
-        t.sendResponseHeaders(200, 0);
-        t.getResponseBody().write(data);
-        t.getResponseBody().close();
-      }
-    });
-  }
-
-  /**
-   * Serves the contents of a given directory from a given root URI.
-   *
-   * @param rootURI
-   * @param dir
-   * @return this
-   */
-  public WebServer serveDir(final String rootURI, final File dir) {
-    if (dir == null)
-      throw new IllegalArgumentException("Null directory");
-
-    if (dir.exists() && !dir.isDirectory())
-      throw new IllegalArgumentException("Not a directory: "
-                                         + dir.getAbsolutePath());
-
-    return servePath(rootURI, dir.getAbsolutePath() + File.separator);
-  }
-
-  /**
-   * Serves the contents of a given path (which may be a directory on the file
-   * system or nested in a jar from the classpath) from a given root URI.
-   *
-   * @param rootURI
-   * @param path NB: should end with a '/'
-   * @return this
-   */
-  public WebServer servePath(final String rootURI, final String path) {
-    File file = new File(path);
-    if (file.exists() && file.isDirectory())
-      srv.createContext(rootURI, new FileHandler(typeProvider, rootURI, path));
-    else
-      srv.createContext(rootURI, new ResourceHandler(typeProvider, rootURI,
-                                                     path));
-    return this;
-  }
-
-  public ContentTypeProvider getContentTypeProvider() {
-    return typeProvider;
-  }
-
   /**
    * Shuts down the web sever.
    * <p>
@@ -104,9 +49,5 @@ public class WebServer implements Closeable {
 
   public int getPort() {
     return srv.getAddress().getPort();
-  }
-
-  public void setContentTypeProvider(ContentTypeProvider contentTypeProvider) {
-    this.typeProvider = contentTypeProvider;
   }
 }

@@ -45,6 +45,7 @@ public class MethodHandler {
 
   private final Context ctx;
 
+  @SuppressWarnings("rawtypes")
   private ResponseConverter converter;
 
   public MethodHandler(Context ctx,
@@ -95,6 +96,7 @@ public class MethodHandler {
     return Arrays.copyOf(res, j);
   }
 
+  @SuppressWarnings("unchecked")
   public boolean handle(HttpExchange r, String[] uri, Request req, Response resp)
       throws Exception {
     if (!r.getRequestMethod().equals(this.verb))

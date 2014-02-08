@@ -92,18 +92,17 @@ public class App {
   }
 
   /**
-   * Scans specified object for route handlers.
+   * Scans specified object for route handlers, i.e. public methods with @Route
+   * annotation.
    *
    * @param obj
    * @see Route
    */
   public void scan(Object obj) {
     for (Method method : obj.getClass().getMethods()) {
-      Route ann = method.getAnnotation(Route.class);
-      if (ann != null) {
-        String route = ann.value();
-        String verb = ann.method();
-        addHandler(ann, method, obj);
+      Route route = method.getAnnotation(Route.class);
+      if (route != null) {
+        addHandler(route, method, obj);
       }
     }
   }
@@ -129,7 +128,7 @@ public class App {
       rest.append('/').append(tok[i]);
     }
 
-    getContext(root.toString()).addHandler(rest.toString(),route,  m, obj);
+    getContext(root.toString()).addHandler(rest.toString(), route, m, obj);
   }
 
   /**
@@ -149,11 +148,10 @@ public class App {
   }
 
   public void addConverter(String name, ResponseConverter<?> conv) {
-    //checkNotStarted();
     converters.put(name, conv);
     for (HttpHandler h : handlers.values()) {
       if (h instanceof Context) {
-        ((Context)h).onConverterAdd(name, conv);
+        ((Context) h).onConverterAdd(name, conv);
       }
     }
   }
@@ -164,7 +162,6 @@ public class App {
 
   public void start() throws IOException {
     srv = new WebServer(port, pool);
-    srv.setContentTypeProvider(mime);
     for (Entry<String, HttpHandler> e : handlers.entrySet())
       srv.addHandler(e.getKey(), e.getValue());
   }
