@@ -2,9 +2,11 @@ package net.jflask;
 
 import com.sun.net.httpserver.HttpExchange;
 
+import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
+import net.jflask.util.IO;
 import net.jflask.util.Log;
 
 /**
@@ -106,9 +108,14 @@ public class MethodHandler {
     }
 
     if (Log.DEBUG)
-      Log.debug("Invoking " + m + " with " + Arrays.toString(args));
+      Log.debug("Invoking "
+                + obj.getClass().getSimpleName()
+                + "."
+                + m.getName()
+                + Arrays.toString(args));
 
     Object res = m.invoke(obj, args);
+
     if (res instanceof String) {
       r.sendResponseHeaders(200, 0);
       r.getResponseBody().write(((String) res).getBytes("UTF-8"));
@@ -117,6 +124,12 @@ public class MethodHandler {
       r.sendResponseHeaders(200, 0);
       r.getResponseBody().write((byte[]) res);
     }
+    else if (res instanceof InputStream) {
+      r.sendResponseHeaders(200, 0);
+      IO.pipe((InputStream) res, r.getResponseBody(), false);
+    }
+    else
+      throw new RuntimeException("Unexpected return value: " + res);
 
     return true;
   }
