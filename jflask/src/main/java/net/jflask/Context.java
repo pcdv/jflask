@@ -25,7 +25,7 @@ public class Context implements HttpHandler {
 
   private final List<MethodHandler> handlers = new ArrayList<>();
 
-  private final App app;
+  final App app;
 
   public Context(App app, String rootURI) {
     this.app = app;
@@ -41,9 +41,9 @@ public class Context implements HttpHandler {
    * @param m a java method
    * @param obj the object on which the method must be invoked
    */
-  public void addHandler(String uri, String verb, Method m, Object obj) {
-    Log.debug("Add handler for " + verb + " on " + rootURI + uri);
-    handlers.add(new MethodHandler(uri, verb, m, obj));
+  public void addHandler(String uri, Route route, Method m, Object obj) {
+    Log.debug("Add handler for " + route.method() + " on " + rootURI + uri);
+    handlers.add(new MethodHandler(this, uri, m, obj, route));
   }
 
   public String getRootURI() {
@@ -57,7 +57,7 @@ public class Context implements HttpHandler {
     try {
       String[] tok = uri.isEmpty() ? EMPTY : uri.substring(1).split("/");
       for (MethodHandler h : handlers) {
-        if (h.handle(r, tok)) {
+        if (h.handle(r, tok, req, req)) {
           return;
         }
       }
@@ -74,5 +74,10 @@ public class Context implements HttpHandler {
     finally {
       r.getResponseBody().close();
     }
+  }
+
+  public void onConverterAdd(String name, ResponseConverter<?> conv) {
+    for (MethodHandler h : handlers)
+      h.onConverterAdd();
   }
 }

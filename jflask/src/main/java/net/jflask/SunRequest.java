@@ -2,7 +2,9 @@ package net.jflask;
 
 import com.sun.net.httpserver.HttpExchange;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.List;
 
 public class SunRequest implements Request, Response {
@@ -52,8 +54,21 @@ public class SunRequest implements Request, Response {
 
   ///////////// Response methods
 
-  public void add(String header, String value) {
+  public void addHeader(String header, String value) {
     exch.getResponseHeaders().add(header, value);
+  }
+
+  public void setStatus(int status) {
+    try {
+      exch.sendResponseHeaders(status, 0);
+    }
+    catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public OutputStream getOutputStream() {
+    return exch.getResponseBody();
   }
 
 }

@@ -64,4 +64,10 @@ public @interface Route {
    */
   String method() default "GET";
 
+  /**
+   * Specifies how the value returned by method must be converted and written
+   * to the response stream. The given value must correspond to the name of a
+   * converter registered in the App.
+   */
+  String converter() default "";
 }

@@ -67,7 +67,9 @@ public class App {
 
   private ContentTypeProvider mime = new DefaultContentTypeProvider();
 
-  private final ThreadLocal<SunRequest> localRequest = new ThreadLocal<SunRequest>();
+  private final ThreadLocal<SunRequest> localRequest = new ThreadLocal<>();
+
+  private final Map<String, ResponseConverter<?>> converters = new Hashtable<>();
 
   public App() {
     // in case we are extended by a subclass with annotations
@@ -101,13 +103,13 @@ public class App {
       if (ann != null) {
         String route = ann.value();
         String verb = ann.method();
-        addHandler(route, verb, method, obj);
+        addHandler(ann, method, obj);
       }
     }
   }
 
-  private void addHandler(String route, String verb, Method m, Object obj) {
-    String[] tok = route.split("/+");
+  private void addHandler(Route route, Method m, Object obj) {
+    String[] tok = route.value().split("/+");
 
     // split the static and dynamic part of the route (i.e. /app/hello/:name =>
     // "/app/hello" + "/:name"). The static part is used to get or create a
@@ -127,7 +129,7 @@ public class App {
       rest.append('/').append(tok[i]);
     }
 
-    getContext(root.toString()).addHandler(rest.toString(), verb, m, obj);
+    getContext(root.toString()).addHandler(rest.toString(),route,  m, obj);
   }
 
   /**
@@ -144,6 +146,20 @@ public class App {
       throw new IllegalStateException("A handler is already registered for: "
                                       + rootURI);
     return (Context) c;
+  }
+
+  public void addConverter(String name, ResponseConverter<?> conv) {
+    //checkNotStarted();
+    converters.put(name, conv);
+    for (HttpHandler h : handlers.values()) {
+      if (h instanceof Context) {
+        ((Context)h).onConverterAdd(name, conv);
+      }
+    }
+  }
+
+  public ResponseConverter<?> getConverter(String name) {
+    return converters.get(name);
   }
 
   public void start() throws IOException {
@@ -211,4 +227,5 @@ public class App {
   public boolean isDebugEnabled() {
     return Log.DEBUG;
   }
+
 }

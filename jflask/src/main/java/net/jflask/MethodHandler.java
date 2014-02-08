@@ -41,14 +41,28 @@ public class MethodHandler {
 
   private final String rootURI;
 
-  public MethodHandler(String uri, String verb, Method m, Object obj) {
+  private final Route route;
+
+  private final Context ctx;
+
+  private ResponseConverter converter;
+
+  public MethodHandler(Context ctx,
+                       String uri,
+                       Method m,
+                       Object obj,
+                       Route route) {
+    this.ctx = ctx;
     this.rootURI = uri;
-    this.verb = verb;
+    this.verb = route.method();
     this.m = m;
     this.obj = obj;
+    this.route = route;
 
     this.tok = uri.isEmpty() ? EMPTY : uri.substring(1).split("/");
     this.idx = calcIndexes(tok);
+
+    onConverterAdd();
 
     // hack for being able to call method even if not public or if the class
     // is not public
@@ -81,7 +95,8 @@ public class MethodHandler {
     return Arrays.copyOf(res, j);
   }
 
-  public boolean handle(HttpExchange r, String[] uri) throws Exception {
+  public boolean handle(HttpExchange r, String[] uri, Request req, Response resp)
+      throws Exception {
     if (!r.getRequestMethod().equals(this.verb))
       return false;
 
@@ -116,7 +131,10 @@ public class MethodHandler {
 
     Object res = m.invoke(obj, args);
 
-    if (res instanceof String) {
+    if (converter != null) {
+      converter.convert(res, resp);
+    }
+    else if (res instanceof String) {
       r.sendResponseHeaders(200, 0);
       r.getResponseBody().write(((String) res).getBytes("UTF-8"));
     }
@@ -132,5 +150,10 @@ public class MethodHandler {
       throw new RuntimeException("Unexpected return value: " + res);
 
     return true;
+  }
+
+  public void onConverterAdd() {
+    if (!route.converter().isEmpty() && converter == null)
+      converter = ctx.app.getConverter(route.converter());
   }
 }

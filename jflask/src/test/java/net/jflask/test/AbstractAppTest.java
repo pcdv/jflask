@@ -18,8 +18,16 @@ public class AbstractAppTest {
   public void setUp() throws IOException {
     app = new App();
     app.setPort(0);
+    preScan();
     app.scan(this);
+    preStart();
     app.start();
+  }
+
+  protected void preScan() {
+  }
+
+  protected void preStart() {
   }
 
   @After
