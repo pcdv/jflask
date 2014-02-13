@@ -136,6 +136,11 @@ public class MethodHandler {
     if (converter != null) {
       converter.convert(res, resp);
     }
+    else if (!route.converter().isEmpty()) {
+      throw new IllegalStateException("Converter "
+                                      + route.converter()
+                                      + " not registered in App.");
+    }
     else if (res instanceof String) {
       r.sendResponseHeaders(200, 0);
       r.getResponseBody().write(((String) res).getBytes("UTF-8"));

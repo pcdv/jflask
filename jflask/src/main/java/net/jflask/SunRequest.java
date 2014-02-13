@@ -29,6 +29,10 @@ public class SunRequest implements Request, Response {
     return qsMark >= 0 ? uri.substring(qsMark + 1) : null;
   }
 
+  public String getMethod() {
+    return exch.getRequestMethod();
+  }
+
   public String getArg(String name, String def) {
     if (qsMark == -1)
       return def;
@@ -52,7 +56,7 @@ public class SunRequest implements Request, Response {
     return exch.getRequestBody();
   }
 
-  ///////////// Response methods
+  // /////////// Response methods
 
   public void addHeader(String header, String value) {
     exch.getResponseHeaders().add(header, value);
