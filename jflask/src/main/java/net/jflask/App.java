@@ -201,6 +201,17 @@ public class App {
     return this;
   }
 
+  public App serveDir(String rootURI, File dir) {
+    FileHandler h = new FileHandler(mime, rootURI, dir.getAbsolutePath()
+                                                   + File.separator);
+
+    handlers.put(rootURI, h);
+    if (srv != null)
+      srv.addHandler(rootURI, h);
+
+    return this;
+  }
+
   public void setContentTypeProvider(ContentTypeProvider mime) {
     this.mime = mime;
   }
