@@ -5,12 +5,14 @@ import java.io.InputStream;
 
 /**
  * Serves files nested in a jar from classpath.
- *
+ * 
  * @author pcdv
  */
 public class ResourceHandler extends AbstractResourceHandler {
 
-  public ResourceHandler(ContentTypeProvider mime, String rootURI, String localPath) {
+  public ResourceHandler(ContentTypeProvider mime,
+                         String rootURI,
+                         String localPath) {
     super(mime, rootURI, localPath);
   }
 
@@ -19,9 +21,10 @@ public class ResourceHandler extends AbstractResourceHandler {
     if (!p.startsWith("/"))
       p = "/" + p;
 
-    InputStream in = String.class.getResourceAsStream(p);
+    InputStream in = getClass().getResourceAsStream(p);
     if (in == null)
       throw new FileNotFoundException(p);
+
     return in;
   }
 }
