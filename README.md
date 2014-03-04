@@ -34,6 +34,8 @@ public class WebApp extends App {
 }
 ```
 
+For more examples, look at the [junits](https://github.com/pcdv/jflask/tree/master/jflask/src/test/java/net/jflask/test)
+
 Features
 --------
  - Minimal size (around 20kB)
