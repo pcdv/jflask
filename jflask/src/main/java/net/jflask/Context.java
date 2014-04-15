@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import net.jflask.util.Log;
@@ -83,5 +84,20 @@ public class Context implements HttpHandler {
   public void onConverterAdd(String name, ResponseConverter<?> conv) {
     for (MethodHandler h : handlers)
       h.onConverterAdd();
+  }
+
+  public void dumpUrls(StringBuilder b) {
+    b.append(rootURI).append(":\n");
+
+    ArrayList<MethodHandler> list = new ArrayList<>(handlers);
+    Collections.sort(list);
+
+    for (MethodHandler mh : list) {
+      b.append(String.format("%-50s  %-8s  %-15s %s\n",
+                             rootURI + mh.getURI(),
+                             mh.getVerb(),
+                             mh.getMethod().getName(),
+                             mh.getMethod().getDeclaringClass().getName()));
+    }
   }
 }

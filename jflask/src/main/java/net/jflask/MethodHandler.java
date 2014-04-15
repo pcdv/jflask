@@ -15,7 +15,7 @@ import net.jflask.util.Log;
  *
  * @author pcdv
  */
-public class MethodHandler {
+public class MethodHandler implements Comparable<MethodHandler> {
 
   private static final String[] EMPTY = {};
 
@@ -48,12 +48,15 @@ public class MethodHandler {
   @SuppressWarnings("rawtypes")
   private ResponseConverter converter;
 
+  private final String uri;
+
   public MethodHandler(Context ctx,
                        String uri,
                        Method m,
                        Object obj,
                        Route route) {
     this.ctx = ctx;
+    this.uri = uri;
     this.rootURI = uri;
     this.verb = route.method();
     this.m = m;
@@ -162,5 +165,23 @@ public class MethodHandler {
   public void onConverterAdd() {
     if (!route.converter().isEmpty() && converter == null)
       converter = ctx.app.getConverter(route.converter());
+  }
+
+  public int compareTo(MethodHandler o) {
+    if (Arrays.equals(tok, o.tok))
+      return verb.compareTo(o.verb);
+    return uri.compareTo(o.uri);
+  }
+
+  public String getURI() {
+    return uri;
+  }
+
+  public String getVerb() {
+    return verb;
+  }
+
+  public Method getMethod() {
+    return m;
   }
 }

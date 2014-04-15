@@ -5,6 +5,9 @@ import com.sun.net.httpserver.HttpHandler;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -236,4 +239,29 @@ public class App {
     return Log.DEBUG;
   }
 
+  /**
+   * Dumps all registered URLs/methods in a readable way into specified buffer.
+   * This can be useful to generate reports or to document an API.
+   */
+  public StringBuilder dumpRoutes(StringBuilder b) {
+
+    ArrayList<Context> ctxs = new ArrayList<>();
+    for (HttpHandler h : handlers.values()) {
+      if (h instanceof Context)
+        ctxs.add((Context) h);
+    }
+
+    Collections.sort(ctxs, new Comparator<Context>() {
+      public int compare(Context o1, Context o2) {
+        return o1.getRootURI().compareTo(o2.getRootURI());
+      }
+    });
+
+    for (Context c : ctxs) {
+      c.dumpUrls(b);
+      b.append('\n');
+    }
+
+    return b;
+  }
 }
