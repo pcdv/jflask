@@ -16,26 +16,22 @@ import net.jflask.util.Log;
  */
 public abstract class AbstractResourceHandler extends DefaultHandler {
 
-  private final String rootURI;
-
-  private final String localPath;
+  protected final String rootURI;
 
   private final ContentTypeProvider mime;
 
   public AbstractResourceHandler(ContentTypeProvider mime,
-                                 String rootURI,
-                                 String localPath) {
+                                 String rootURI) {
     this.mime = mime;
     this.rootURI = rootURI;
-    this.localPath = localPath;
   }
 
   @Override
   public void doGet(HttpExchange t) throws Exception {
     String uri = t.getRequestURI().toString();
-    String path = uri.replaceFirst("^" + rootURI, localPath);
-    if (path.endsWith("/"))
-      path += "index.html";
+    if (uri.endsWith("/"))
+      uri += "index.html";
+    String path = uri.replaceFirst("^" + rootURI, "");
 
     int status = 200;
     InputStream in = null;

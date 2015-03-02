@@ -10,14 +10,19 @@ import java.io.InputStream;
  */
 public class ResourceHandler extends AbstractResourceHandler {
 
+  private final String localPath;
+
   public ResourceHandler(ContentTypeProvider mime,
                          String rootURI,
                          String localPath) {
-    super(mime, rootURI, localPath);
+    super(mime, rootURI);
+    this.localPath = localPath;
   }
 
   @Override
   protected InputStream openPath(String p) throws FileNotFoundException {
+    p = localPath + p;
+
     if (!p.startsWith("/"))
       p = "/" + p;
 
