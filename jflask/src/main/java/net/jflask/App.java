@@ -185,7 +185,7 @@ public class App {
    * system or nested in a jar from the classpath) from a given root URI.
    *
    * @param rootURI
-   * @param localPath NB: should end with a '/'
+   * @param path NB: should end with a '/'
    * @return
    * @return this
    */
@@ -193,7 +193,7 @@ public class App {
     File file = new File(path);
     AbstractResourceHandler h;
     if (file.exists() && file.isDirectory())
-      h = new FileHandler(mime, rootURI, path);
+      h = new FileHandler(mime, rootURI, file);
     else
       h = new ResourceHandler(mime, rootURI, path);
 
@@ -205,8 +205,7 @@ public class App {
   }
 
   public App serveDir(String rootURI, File dir) {
-    FileHandler h = new FileHandler(mime, rootURI, dir.getAbsolutePath()
-                                                   + File.separator);
+    FileHandler h = new FileHandler(mime, rootURI, dir);
 
     handlers.put(rootURI, h);
     if (srv != null)
