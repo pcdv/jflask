@@ -1,8 +1,5 @@
 package net.jflask;
 
-import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
-
 import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.reflect.Method;
@@ -10,6 +7,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpHandler;
 import net.jflask.util.Log;
 
 /**
@@ -38,7 +37,6 @@ public class Context implements HttpHandler {
    * specified URI (relative to rootURI).
    *
    * @param uri URI schema relative to rootURI (eg. "/:name")
-   * @param verb a HTTP method (GET, POST, ...)
    * @param m a java method
    * @param obj the object on which the method must be invoked
    */

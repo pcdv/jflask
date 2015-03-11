@@ -1,11 +1,10 @@
 package net.jflask;
 
-import com.sun.net.httpserver.HttpExchange;
-
 import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
+import com.sun.net.httpserver.HttpExchange;
 import net.jflask.util.IO;
 import net.jflask.util.Log;
 
@@ -117,13 +116,13 @@ public class MethodHandler implements Comparable<MethodHandler> {
         return false;
     }
 
-    Object[] args = new Object[idx.length];
+    String[] args = new String[idx.length];
     for (int i = 0; i < args.length; i++) {
       args[i] = uri[idx[i]];
     }
     if (splat != -1) {
       for (int i = splat + 1; i < uri.length; i++) {
-        args[splat] += "/" + uri[i];
+        args[args.length - 1] += "/" + uri[i];
       }
     }
 
