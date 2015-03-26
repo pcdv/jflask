@@ -1,18 +1,22 @@
 package net.jflask;
 
-import com.sun.net.httpserver.HttpHandler;
-
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Random;
 import java.util.concurrent.ExecutorService;
 
+import com.sun.net.httpserver.Headers;
+import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpHandler;
 import net.jflask.sun.AbstractResourceHandler;
 import net.jflask.sun.ContentTypeProvider;
 import net.jflask.sun.DefaultContentTypeProvider;
@@ -27,9 +31,9 @@ import net.jflask.util.Log;
  * route handlers are defined in an external class (i.e. not extending the main
  * App), {@link #scan(Object)} must be called in order to detect them in an
  * instance of the class.
- * <p>
+ * <p/>
  * The App can be extended with some handlers:
- *
+ * <p/>
  * <pre>
  * public class MyApp extends App {
  *   &#064;Route(value = &quot;/hello/:name&quot;)
@@ -40,9 +44,9 @@ import net.jflask.util.Log;
  * ...
  * new MyApp().start()
  * </pre>
- *
+ * <p/>
  * Or the App can be extended by calling scan():
- *
+ * <p/>
  * <pre>
  * public class MyApp {
  *   &#064;Route(value = &quot;/hello/:name&quot;)
@@ -72,7 +76,12 @@ public class App {
 
   private final ThreadLocal<SunRequest> localRequest = new ThreadLocal<>();
 
-  private final Map<String, ResponseConverter<?>> converters = new Hashtable<>();
+  private final Map<String, ResponseConverter<?>> converters =
+      new Hashtable<>();
+
+  private String loginPage;
+
+  private Map<String, Object> sessions = new Hashtable<>();
 
   public App() {
     // in case we are extended by a subclass with annotations
@@ -98,7 +107,6 @@ public class App {
    * Scans specified object for route handlers, i.e. public methods with @Route
    * annotation.
    *
-   * @param obj
    * @see Route
    */
   public void scan(Object obj) {
@@ -145,8 +153,7 @@ public class App {
       handlers.put(rootURI, c = new Context(this, rootURI));
     }
     else if (!(c instanceof Context))
-      throw new IllegalStateException("A handler is already registered for: "
-                                      + rootURI);
+      throw new IllegalStateException("A handler is already registered for: " + rootURI);
     return (Context) c;
   }
 
@@ -184,9 +191,7 @@ public class App {
    * Serves the contents of a given path (which may be a directory on the file
    * system or nested in a jar from the classpath) from a given root URI.
    *
-   * @param rootURI
    * @param path NB: should end with a '/'
-   * @return
    * @return this
    */
   public App servePath(String rootURI, String path) {
@@ -244,23 +249,109 @@ public class App {
    */
   public StringBuilder dumpRoutes(StringBuilder b) {
 
-    ArrayList<Context> ctxs = new ArrayList<>();
+    ArrayList<Context> contexts = new ArrayList<>();
     for (HttpHandler h : handlers.values()) {
       if (h instanceof Context)
-        ctxs.add((Context) h);
+        contexts.add((Context) h);
     }
 
-    Collections.sort(ctxs, new Comparator<Context>() {
+    Collections.sort(contexts, new Comparator<Context>() {
       public int compare(Context o1, Context o2) {
         return o1.getRootURI().compareTo(o2.getRootURI());
       }
     });
 
-    for (Context c : ctxs) {
+    for (Context c : contexts) {
       c.dumpUrls(b);
       b.append('\n');
     }
 
     return b;
+  }
+
+  /**
+   * Marks current session as logged in (by setting a cookie).
+   */
+  public String createSession(String login) {
+    String token = makeRandomToken(login);
+    getResponse().addHeader("Set-Cookie", "sessionToken=" + token);
+    sessions.put(token, ""); // TODO
+    return "";
+  }
+
+  private String makeRandomToken(String login) {
+    return (new Random().nextLong() ^ login.hashCode()) + "";
+  }
+
+  /**
+   * Replies to current request with an HTTP redirect response with specified
+   * location.
+   */
+  public CustomResponse redirect(String location) {
+    Response r = getResponse();
+    r.addHeader("Location", location);
+    r.setStatus(HttpURLConnection.HTTP_MOVED_TEMP);
+    return CustomResponse.INSTANCE;
+  }
+
+  /**
+   * Checks that the user is currently logged in. This is performed by looking
+   * at the "sessionToken" cookie that has been set in session during last
+   * call to createSession().
+   * <p/>
+   * If the user is logged in, the method simply returns true. Otherwise,
+   * if the path of the login page has been set using @LoginPage or
+   * setLoginPage(), the user is redirected to it. Otherwise a 403 error is
+   * returned.
+   */
+  public boolean checkLoggedIn(HttpExchange r) throws IOException {
+    String token = getCookie(r, "sessionToken");
+    if (token != null && sessions.containsKey(token)) {
+      return true;
+    }
+    else {
+      if (loginPage != null)
+        redirect(loginPage);
+      else
+        r.sendResponseHeaders(HttpURLConnection.HTTP_FORBIDDEN, -1);
+      return false;
+    }
+  }
+
+  private String getCookie(HttpExchange r, String name) {
+    Headers headers = r.getRequestHeaders();
+    if (headers != null) {
+      List<String> cookies = headers.get("Cookie");
+      if (cookies != null) {
+        for (String s : cookies) {
+          if (s.startsWith(name) && s.charAt(name.length()) == '=') {
+            return s.substring(name.length() + 1);
+          }
+        }
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Sets the path of the login page, to which redirect all URLs that require a
+   * logged in user. This method can either be called directly or one of the
+   * URL handler methods can be annotated with @LoginPage.
+   */
+  public void setLoginPage(String path) {
+    this.loginPage = path;
+  }
+
+  /**
+   * Call this method to destroy the current session, i.e. make the user
+   * appearing as "not logged in".
+   *
+   * @see net.jflask.LoginRequired
+   */
+  public void destroySession() {
+    HttpExchange x = ((SunRequest) getRequest()).getExchange();
+    String token = getCookie(x, "sessionToken");
+    if (token != null)
+      sessions.remove(token);
   }
 }

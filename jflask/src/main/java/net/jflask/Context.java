@@ -33,7 +33,7 @@ public class Context implements HttpHandler {
   }
 
   /**
-   * Registers a java method that must be called to process requests matchinig
+   * Registers a java method that must be called to process requests matching
    * specified URI (relative to rootURI).
    *
    * @param uri URI schema relative to rootURI (eg. "/:name")
@@ -56,7 +56,7 @@ public class Context implements HttpHandler {
     try {
       String[] tok = uri.isEmpty() ? EMPTY : uri.substring(1).split("/");
       for (MethodHandler h : handlers) {
-        if (h.handle(r, tok, req, req)) {
+        if (h.handle(r, tok, req)) {
           return;
         }
       }
@@ -81,7 +81,7 @@ public class Context implements HttpHandler {
 
   public void onConverterAdd(String name, ResponseConverter<?> conv) {
     for (MethodHandler h : handlers)
-      h.onConverterAdd();
+      h.onConverterAdd(name, conv);
   }
 
   public void dumpUrls(StringBuilder b) {

@@ -18,7 +18,7 @@ public class MethodHandler implements Comparable<MethodHandler> {
 
   private static final String[] EMPTY = {};
 
-  /** HTTP method */
+  /** The HTTP method */
   private final String verb;
 
   /** The method to invoke to process request. */
@@ -35,6 +35,8 @@ public class MethodHandler implements Comparable<MethodHandler> {
    * "/hello/world" if URI schema is "/hello/:name"
    */
   private final int[] idx;
+
+  private final boolean loginRequired;
 
   private int splat = -1;
 
@@ -65,7 +67,14 @@ public class MethodHandler implements Comparable<MethodHandler> {
     this.tok = uri.isEmpty() ? EMPTY : uri.substring(1).split("/");
     this.idx = calcIndexes(tok);
 
-    onConverterAdd();
+    loginRequired = m.getDeclaredAnnotation(LoginRequired.class) != null;
+
+    if (m.getDeclaredAnnotation(LoginPage.class) != null)
+      ctx.app.setLoginPage(ctx.getRootURI() + uri);
+
+    // NB: the converter may be undefined in App at this time
+    if (!route.converter().isEmpty())
+      this.converter = ctx.app.getConverter(route.converter());
 
     // hack for being able to call method even if not public or if the class
     // is not public
@@ -75,7 +84,7 @@ public class MethodHandler implements Comparable<MethodHandler> {
     for (Class<?> c : m.getParameterTypes()) {
       if (c != String.class)
         throw new RuntimeException//
-        ("Only String supported in method arguments (for now): " + m);
+                  ("Only String supported in method arguments (for now): " + m);
     }
   }
 
@@ -99,49 +108,37 @@ public class MethodHandler implements Comparable<MethodHandler> {
   }
 
   @SuppressWarnings("unchecked")
-  public boolean handle(HttpExchange r, String[] uri, Request req, Response resp)
-      throws Exception {
-    if (!r.getRequestMethod().equals(this.verb))
+  public boolean handle(HttpExchange r,
+                        String[] uri,
+                        Response resp) throws Exception {
+
+    if (!isApplicable(r, uri))
       return false;
 
-    if (uri.length != tok.length) {
-      if (splat == -1 || uri.length < tok.length)
-        return false;
+    if (loginRequired && !ctx.app.checkLoggedIn(r)) {
+      return true;
     }
 
-    for (int i = 0; i < tok.length; i++) {
-      if (tok[i].charAt(0) != ':'
-          && tok[i].charAt(0) != '*'
-          && !tok[i].equals(uri[i]))
-        return false;
-    }
-
-    String[] args = new String[idx.length];
-    for (int i = 0; i < args.length; i++) {
-      args[i] = uri[idx[i]];
-    }
-    if (splat != -1) {
-      for (int i = splat + 1; i < uri.length; i++) {
-        args[args.length - 1] += "/" + uri[i];
-      }
-    }
+    String[] args = extractArgs(uri);
 
     if (Log.DEBUG)
-      Log.debug("Invoking "
-                + obj.getClass().getSimpleName()
-                + "."
-                + m.getName()
-                + Arrays.toString(args));
+      Log.debug("Invoking " + obj.getClass()
+                                 .getSimpleName() + "." + m.getName() + Arrays.toString(args));
 
-    Object res = m.invoke(obj, args);
+    return processResponse(r, resp, m.invoke(obj, args));
+  }
 
+  private boolean processResponse(HttpExchange r,
+                                  Response resp,
+                                  Object res) throws Exception {
     if (converter != null) {
       converter.convert(res, resp);
     }
     else if (!route.converter().isEmpty()) {
-      throw new IllegalStateException("Converter "
-                                      + route.converter()
-                                      + " not registered in App.");
+      throw new IllegalStateException("Converter " + route.converter() + " not registered in App.");
+    }
+    else if (res instanceof CustomResponse) {
+      // do nothing: status and headers should already be set
     }
     else if (res instanceof String) {
       r.sendResponseHeaders(200, 0);
@@ -161,9 +158,48 @@ public class MethodHandler implements Comparable<MethodHandler> {
     return true;
   }
 
-  public void onConverterAdd() {
-    if (!route.converter().isEmpty() && converter == null)
-      converter = ctx.app.getConverter(route.converter());
+  /**
+   * Computes the list of arguments to pass to the decorated method.
+   */
+  private String[] extractArgs(String[] uri) {
+    String[] args = new String[idx.length];
+    for (int i = 0; i < args.length; i++) {
+      args[i] = uri[idx[i]];
+    }
+    if (splat != -1) {
+      for (int i = splat + 1; i < uri.length; i++) {
+        args[args.length - 1] += "/" + uri[i];
+      }
+    }
+    return args;
+  }
+
+  /**
+   * Checks whether current handler should respond to specified request.
+   */
+  private boolean isApplicable(HttpExchange r, String[] uri) {
+    if (!r.getRequestMethod().equals(this.verb))
+      return false;
+
+    if (uri.length != tok.length) {
+      if (splat == -1 || uri.length < tok.length)
+        return false;
+    }
+
+    for (int i = 0; i < tok.length; i++) {
+      if (tok[i].charAt(0) != ':' && tok[i].charAt(0) != '*' && !tok[i].equals(uri[i]))
+        return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * Called when a converter is added to the App after the handler was created.
+   */
+  public void onConverterAdd(String name, ResponseConverter converter) {
+    if (this.converter == null && name.equals(route.converter()))
+      this.converter = converter;
   }
 
   public int compareTo(MethodHandler o) {
