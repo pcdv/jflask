@@ -40,9 +40,11 @@ public class Context implements HttpHandler {
    * @param m a java method
    * @param obj the object on which the method must be invoked
    */
-  public void addHandler(String uri, Route route, Method m, Object obj) {
+  public MethodHandler addHandler(String uri, Route route, Method m, Object obj) {
     Log.debug("Add handler for " + route.method() + " on " + rootURI + uri);
-    handlers.add(new MethodHandler(this, uri, m, obj, route));
+    MethodHandler handler = new MethodHandler(this, uri, m, obj, route);
+    handlers.add(handler);
+    return handler;
   }
 
   public String getRootURI() {
@@ -77,11 +79,6 @@ public class Context implements HttpHandler {
     finally {
       r.getResponseBody().close();
     }
-  }
-
-  public void onConverterAdd(String name, ResponseConverter<?> conv) {
-    for (MethodHandler h : handlers)
-      h.onConverterAdd(name, conv);
   }
 
   public void dumpUrls(StringBuilder b) {

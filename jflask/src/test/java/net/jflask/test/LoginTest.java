@@ -46,11 +46,6 @@ public class LoginTest extends AbstractAppTest {
     return app.redirect("/login");
   }
 
-  @Override
-  protected void preScan() {
-    app.setPort(8181);
-  }
-
   @Test
   public void testLogin() throws Exception {
     // app redirects to login page when not logged in
