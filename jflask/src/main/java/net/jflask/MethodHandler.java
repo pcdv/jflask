@@ -36,7 +36,7 @@ public class MethodHandler implements Comparable<MethodHandler> {
    */
   private final int[] idx;
 
-  private final boolean loginRequired;
+  private boolean loginRequired;
 
   private int splat = -1;
 
@@ -63,18 +63,13 @@ public class MethodHandler implements Comparable<MethodHandler> {
     this.m = m;
     this.obj = obj;
     this.route = route;
-
     this.tok = uri.isEmpty() ? EMPTY : uri.substring(1).split("/");
     this.idx = calcIndexes(tok);
-
-    loginRequired = m.getDeclaredAnnotation(LoginRequired.class) != null;
 
     if (m.getDeclaredAnnotation(LoginPage.class) != null)
       ctx.app.setLoginPage(ctx.getRootURI() + uri);
 
-    // NB: the converter may be undefined in App at this time
-    if (!route.converter().isEmpty())
-      this.converter = ctx.app.getConverter(route.converter());
+    configure();
 
     // hack for being able to call method even if not public or if the class
     // is not public
@@ -86,6 +81,22 @@ public class MethodHandler implements Comparable<MethodHandler> {
         throw new RuntimeException//
                   ("Only String supported in method arguments (for now): " + m);
     }
+  }
+
+  /**
+   * Called during construction and when App configuration changes that may
+   * require adaptation in handlers.
+   */
+  public void configure() {
+    if (m.getDeclaredAnnotation(LoginRequired.class) != null)
+      loginRequired = true;
+    else if (m.getDeclaredAnnotation(LoginNotRequired.class) != null || m.getDeclaredAnnotation(LoginPage.class) != null)
+      loginRequired = false;
+    else
+      loginRequired = ctx.app.getRequireLoggedInByDefault();
+
+    if (this.converter == null && !route.converter().isEmpty())
+      this.converter = ctx.app.getConverter(route.converter());
   }
 
   private int[] calcIndexes(String[] tok) {
@@ -194,14 +205,6 @@ public class MethodHandler implements Comparable<MethodHandler> {
     return true;
   }
 
-  /**
-   * Called when a converter is added to the App after the handler was created.
-   */
-  public void onConverterAdd(String name, ResponseConverter converter) {
-    if (this.converter == null && name.equals(route.converter()))
-      this.converter = converter;
-  }
-
   public int compareTo(MethodHandler o) {
     if (Arrays.equals(tok, o.tok))
       return verb.compareTo(o.verb);
@@ -219,4 +222,5 @@ public class MethodHandler implements Comparable<MethodHandler> {
   public Method getMethod() {
     return m;
   }
+
 }

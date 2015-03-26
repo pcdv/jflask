@@ -83,6 +83,10 @@ public class App {
 
   private Map<String, Object> sessions = new Hashtable<>();
 
+  private boolean requireLoggedInByDefault;
+
+  private List<MethodHandler> allHandlers = new ArrayList<>(256);
+
   public App() {
     // in case we are extended by a subclass with annotations
     scan(this);
@@ -139,7 +143,10 @@ public class App {
       rest.append('/').append(tok[i]);
     }
 
-    getContext(root.toString()).addHandler(rest.toString(), route, m, obj);
+    MethodHandler handler =
+        getContext(root.toString()).addHandler(rest.toString(), route, m, obj);
+
+    allHandlers.add(handler);
   }
 
   /**
@@ -159,11 +166,7 @@ public class App {
 
   public void addConverter(String name, ResponseConverter<?> conv) {
     converters.put(name, conv);
-    for (HttpHandler h : handlers.values()) {
-      if (h instanceof Context) {
-        ((Context) h).onConverterAdd(name, conv);
-      }
-    }
+    reconfigureHandlers();
   }
 
   public ResponseConverter<?> getConverter(String name) {
@@ -334,11 +337,39 @@ public class App {
 
   /**
    * Sets the path of the login page, to which redirect all URLs that require a
-   * logged in user. This method can either be called directly or one of the
+   * logged in user. This method can be called directly, or otherwise one of the
    * URL handler methods can be annotated with @LoginPage.
+   *
+   * @param path the path of the login page
    */
   public void setLoginPage(String path) {
     this.loginPage = path;
+  }
+
+  /**
+   * Sets the default policy for checking whether user must be logged in to
+   * access all URLs by default.
+   *
+   * @param flag if true, all URL handlers require the user to be logged in
+   * except when annotated with @LoginNotRequired. If false, only handlers
+   * annotated with @LoginRequired will be protected
+   */
+  public void setRequireLoggedInByDefault(boolean flag) {
+    this.requireLoggedInByDefault = flag;
+    reconfigureHandlers();
+  }
+
+  /**
+   * Returns the default policy for checking whether user must be logged
+   * in to access all URLs by default.
+   */
+  public boolean getRequireLoggedInByDefault() {
+    return requireLoggedInByDefault;
+  }
+
+  private void reconfigureHandlers() {
+    for (MethodHandler h : allHandlers)
+      h.configure();
   }
 
   /**
