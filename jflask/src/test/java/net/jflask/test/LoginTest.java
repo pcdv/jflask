@@ -23,7 +23,7 @@ public class LoginTest extends AbstractAppTest {
 
   @Route("/logout")
   public CustomResponse logout() {
-    app.destroySession();
+    app.logoutUser();
     return app.redirect("/login");
   }
 
@@ -39,7 +39,7 @@ public class LoginTest extends AbstractAppTest {
     String pass = app.getRequest().getForm("password");
 
     if (login.equals("foo") && pass.equals("bar")) {
-      app.createSession(login);
+      app.loginUser(login);
       return app.redirect("/app");
     }
 
@@ -53,10 +53,22 @@ public class LoginTest extends AbstractAppTest {
 
   @Test
   public void testLogin() throws Exception {
+    // app redirects to login page when not logged in
     assertEquals("Please login", client.get("/app"));
+
+    // wrong login/password redirects to login page
     assertEquals("Please login", client.post("/login", "login=foo&password="));
+
+    // good login/password redirects to app
     assertEquals("Welcome", client.post("/login", "login=foo&password=bar"));
+
+    // app remains accessible thanks to session cookie
+    assertEquals("Welcome", client.get("/app"));
+
+    // logout link redirects to login page
     assertEquals("Please login", client.get("/logout"));
+
+    // app redirects to login page when not logged in
     assertEquals("Please login", client.get("/app"));
   }
 }

@@ -272,11 +272,10 @@ public class App {
   /**
    * Marks current session as logged in (by setting a cookie).
    */
-  public String createSession(String login) {
+  public void loginUser(String login) {
     String token = makeRandomToken(login);
     getResponse().addHeader("Set-Cookie", "sessionToken=" + token);
-    sessions.put(token, ""); // TODO
-    return "";
+    sessions.put(token, ""); // TODO: store more useful info about the user
   }
 
   private String makeRandomToken(String login) {
@@ -348,7 +347,7 @@ public class App {
    *
    * @see net.jflask.LoginRequired
    */
-  public void destroySession() {
+  public void logoutUser() {
     HttpExchange x = ((SunRequest) getRequest()).getExchange();
     String token = getCookie(x, "sessionToken");
     if (token != null)
