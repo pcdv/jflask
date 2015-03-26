@@ -1,11 +1,11 @@
 package net.jflask.test;
 
-import static org.junit.Assert.*;
 import net.jflask.Response;
 import net.jflask.ResponseConverter;
 import net.jflask.Route;
-
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 public class ConverterTest extends AbstractAppTest {
 
@@ -37,11 +37,11 @@ public class ConverterTest extends AbstractAppTest {
         resp.getOutputStream().write(("*" + data + "*").getBytes());
       }
     });
-    assertEquals("*Hello world*", get("/hello/world?foo=bar"));
+    assertEquals("*Hello world*", client.get("/hello/world?foo=bar"));
   }
 
   @Test
   public void testConverterAddedBeforeScan() throws Exception {
-    assertEquals("FOO Hello world", get("/hello2/world"));
+    assertEquals("FOO Hello world", client.get("/hello2/world"));
   }
 }

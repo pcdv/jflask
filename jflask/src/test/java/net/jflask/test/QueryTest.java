@@ -1,10 +1,10 @@
 package net.jflask.test;
 
-import static org.junit.Assert.*;
 import net.jflask.Route;
-
 import org.junit.Ignore;
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 public class QueryTest extends AbstractAppTest {
 
@@ -25,23 +25,23 @@ public class QueryTest extends AbstractAppTest {
 
   @Test
   public void testTrimQS() throws Exception {
-    assertEquals("Hello world", get("/hello/world?foo=bar"));
+    assertEquals("Hello world", client.get("/hello/world?foo=bar"));
   }
 
   @Test
   public void testGetArg() throws Exception {
-    assertEquals("Hello world", get("/hello2?name=world"));
+    assertEquals("Hello world", client.get("/hello2?name=world"));
   }
 
   @Test
-  @Ignore
+  @Ignore // looks like URL does not work with trailing slash
   public void testGetArgSlash() throws Exception {
-    assertEquals("Hello world", get("/hello2/?name=world"));
+    assertEquals("Hello world", client.get("/hello2/?name=world"));
   }
 
   @Test
   public void testReturnByteArray() throws Exception {
-    assertEquals("Hello world", get("/hello_bytearray?name=world"));
+    assertEquals("Hello world", client.get("/hello_bytearray?name=world"));
   }
 
 }

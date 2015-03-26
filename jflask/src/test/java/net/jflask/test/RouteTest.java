@@ -1,9 +1,9 @@
 package net.jflask.test;
 
-import static org.junit.Assert.*;
 import net.jflask.Route;
-
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 public class RouteTest extends AbstractAppTest {
 
@@ -24,8 +24,8 @@ public class RouteTest extends AbstractAppTest {
 
   @Test
   public void testHelloWorld() throws Exception {
-    assertEquals("Hello world", get("/hello/world"));
-    assertEquals("Hello world 2", get("/hello/world/2"));
-    assertEquals("Hello world", get("/db/hello/world/stuff"));
+    assertEquals("Hello world", client.get("/hello/world"));
+    assertEquals("Hello world 2", client.get("/hello/world/2"));
+    assertEquals("Hello world", client.get("/db/hello/world/stuff"));
   }
 }
