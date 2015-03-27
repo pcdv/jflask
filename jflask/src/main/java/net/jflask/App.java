@@ -143,6 +143,9 @@ public class App {
       rest.append('/').append(tok[i]);
     }
 
+//    if (rest.length() == 0)
+//      rest.append('/');
+
     MethodHandler handler =
         getContext(root.toString()).addHandler(rest.toString(), route, m, obj);
 
@@ -175,8 +178,12 @@ public class App {
 
   public void start() throws IOException {
     srv = new WebServer(port, pool);
-    for (Entry<String, HttpHandler> e : handlers.entrySet())
-      srv.addHandler(e.getKey(), e.getValue());
+    for (Entry<String, HttpHandler> e : handlers.entrySet()) {
+      String path = e.getKey();
+      if (path.isEmpty())
+        path = "/";
+      srv.addHandler(path, e.getValue());
+    }
   }
 
   public int getPort() {

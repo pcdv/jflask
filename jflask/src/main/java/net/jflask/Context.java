@@ -40,7 +40,10 @@ public class Context implements HttpHandler {
    * @param m a java method
    * @param obj the object on which the method must be invoked
    */
-  public MethodHandler addHandler(String uri, Route route, Method m, Object obj) {
+  public MethodHandler addHandler(String uri,
+                                  Route route,
+                                  Method m,
+                                  Object obj) {
     Log.debug("Add handler for " + route.method() + " on " + rootURI + uri);
     MethodHandler handler = new MethodHandler(this, uri, m, obj, route);
     handlers.add(handler);
@@ -56,16 +59,15 @@ public class Context implements HttpHandler {
     app.setThreadLocalRequest(req);
     String uri = req.getRequestURI().substring(rootURI.length());
     try {
-      String[] tok = uri.isEmpty() ? EMPTY : uri.substring(1).split("/");
+      String[] tok = (uri.isEmpty() || uri.equals("/")) ? EMPTY
+                                                        : uri.substring(1)
+                                                             .split("/");
       for (MethodHandler h : handlers) {
         if (h.handle(r, tok, req)) {
           return;
         }
       }
-      Log.warn("No handler found for: "
-               + r.getRequestMethod()
-               + " "
-               + req.getRequestURI());
+      Log.warn("No handler found for: " + r.getRequestMethod() + " " + req.getRequestURI());
 
       r.sendResponseHeaders(404, 0);
     }
@@ -75,8 +77,7 @@ public class Context implements HttpHandler {
       if (app.isDebugEnabled()) {
         ex.printStackTrace(new PrintStream(r.getResponseBody()));
       }
-    }
-    finally {
+    } finally {
       r.getResponseBody().close();
     }
   }
