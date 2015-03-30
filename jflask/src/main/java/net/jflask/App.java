@@ -81,7 +81,7 @@ public class App {
 
   private String loginPage;
 
-  private Map<String, Object> sessions = new Hashtable<>();
+  private Map<String, String> sessions = new Hashtable<>();
 
   private boolean requireLoggedInByDefault;
 
@@ -285,7 +285,13 @@ public class App {
   public void loginUser(String login) {
     String token = makeRandomToken(login);
     getResponse().addHeader("Set-Cookie", "sessionToken=" + token);
-    sessions.put(token, ""); // TODO: store more useful info about the user
+    sessions.put(token, login); // TODO: store more useful info about the user
+  }
+
+  public String getCurrentLogin() {
+    String token =
+        getCookie(((SunRequest) getRequest()).getExchange(), "sessionToken");
+    return sessions.get(token);
   }
 
   private String makeRandomToken(String login) {
