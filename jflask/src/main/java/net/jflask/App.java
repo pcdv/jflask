@@ -288,6 +288,10 @@ public class App {
     sessions.put(token, login); // TODO: store more useful info about the user
   }
 
+  /**
+   * Returns the login bound with current request (i.e. the one that has been
+   * associated with session using {@link #loginUser(String)}.
+   */
   public String getCurrentLogin() {
     String token =
         getCookie(((SunRequest) getRequest()).getExchange(), "sessionToken");
