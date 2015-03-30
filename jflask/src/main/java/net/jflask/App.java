@@ -81,11 +81,12 @@ public class App {
 
   private String loginPage;
 
-  private Map<String, String> sessions = new Hashtable<>();
 
   private boolean requireLoggedInByDefault;
 
   private List<MethodHandler> allHandlers = new ArrayList<>(256);
+
+  private SessionManager sessionManager = new DefaultSessionManager();
 
   public App() {
     // in case we are extended by a subclass with annotations
@@ -283,9 +284,19 @@ public class App {
    * Marks current session as logged in (by setting a cookie).
    */
   public void loginUser(String login) {
-    String token = makeRandomToken(login);
+    loginUser(login, false, makeRandomToken(login));
+  }
+
+  /**
+   * Marks current session as logged in (by setting a cookie).
+   */
+  public void loginUser(String login, boolean rememberMe, String token) {
+    sessionManager.createToken(token, login, rememberMe);
     getResponse().addHeader("Set-Cookie", "sessionToken=" + token);
-    sessions.put(token, login); // TODO: store more useful info about the user
+  }
+
+  public void setSessionManager(SessionManager mgr) {
+    this.sessionManager = mgr;
   }
 
   /**
@@ -295,10 +306,10 @@ public class App {
   public String getCurrentLogin() {
     String token =
         getCookie(((SunRequest) getRequest()).getExchange(), "sessionToken");
-    return sessions.get(token);
+    return sessionManager.getLogin(token);
   }
 
-  private String makeRandomToken(String login) {
+  public String makeRandomToken(String login) {
     return (new Random().nextLong() ^ login.hashCode()) + "";
   }
 
@@ -325,7 +336,7 @@ public class App {
    */
   public boolean checkLoggedIn(HttpExchange r) throws IOException {
     String token = getCookie(r, "sessionToken");
-    if (token != null && sessions.containsKey(token)) {
+    if (token != null && sessionManager.isTokenValid(token)) {
       return true;
     }
     else {
@@ -384,6 +395,10 @@ public class App {
     return requireLoggedInByDefault;
   }
 
+  /**
+   * Reconfigures existing handlers after a change of configuration (converted
+   * added etc.).
+   */
   private void reconfigureHandlers() {
     for (MethodHandler h : allHandlers)
       h.configure();
@@ -399,6 +414,6 @@ public class App {
     HttpExchange x = ((SunRequest) getRequest()).getExchange();
     String token = getCookie(x, "sessionToken");
     if (token != null)
-      sessions.remove(token);
+      sessionManager.removeToken(token);
   }
 }
