@@ -1,10 +1,9 @@
 package net.jflask.sun;
 
-import com.sun.net.httpserver.HttpExchange;
-
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 
+import com.sun.net.httpserver.HttpExchange;
 import net.jflask.util.IO;
 import net.jflask.util.Log;
 
@@ -29,6 +28,12 @@ public abstract class AbstractResourceHandler extends DefaultHandler {
   @Override
   public void doGet(HttpExchange t) throws Exception {
     String uri = t.getRequestURI().toString();
+
+    // ignore query string
+    int qs = uri.indexOf('?');
+    if (qs > 0)
+      uri = uri.substring(0, qs);
+
     if (uri.endsWith("/"))
       uri += "index.html";
     String path = uri.replaceFirst("^" + rootURI, "");

@@ -28,4 +28,9 @@ public class RouteTest extends AbstractAppTest {
     assertEquals("Hello world 2", client.get("/hello/world/2"));
     assertEquals("Hello world", client.get("/db/hello/world/stuff"));
   }
+
+  @Test
+  public void testSearch() throws Exception {
+    assertEquals("Hello world", client.get("/hello/world?foo=bar"));
+  }
 }
