@@ -198,20 +198,25 @@ public class App {
     srv.close();
   }
 
+  public App servePath(String rootURI, String path) {
+    return servePath(rootURI, path, null);
+  }
+
   /**
    * Serves the contents of a given path (which may be a directory on the file
    * system or nested in a jar from the classpath) from a given root URI.
    *
    * @param path NB: should end with a '/'
+   * @param loader
    * @return this
    */
-  public App servePath(String rootURI, String path) {
+  public App servePath(String rootURI, String path, ClassLoader loader) {
     File file = new File(path);
     AbstractResourceHandler h;
     if (file.exists() && file.isDirectory())
       h = new FileHandler(mime, rootURI, file);
     else
-      h = new ResourceHandler(mime, rootURI, path);
+      h = new ResourceHandler(mime, rootURI, path, loader);
 
     handlers.put(rootURI, h);
     if (srv != null)

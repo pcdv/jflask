@@ -130,7 +130,7 @@ public class MethodHandler implements Comparable<MethodHandler> {
       return true;
     }
 
-    String[] args = extractArgs(uri);
+    Object[] args = extractArgs(uri);
 
     if (Log.DEBUG)
       Log.debug("Invoking " + obj.getClass()
