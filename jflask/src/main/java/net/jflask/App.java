@@ -81,7 +81,6 @@ public class App {
 
   private String loginPage;
 
-
   private boolean requireLoggedInByDefault;
 
   private List<MethodHandler> allHandlers = new ArrayList<>(256);
@@ -207,7 +206,6 @@ public class App {
    * system or nested in a jar from the classpath) from a given root URI.
    *
    * @param path NB: should end with a '/'
-   * @param loader
    * @return this
    */
   public App servePath(String rootURI, String path, ClassLoader loader) {
@@ -331,13 +329,12 @@ public class App {
 
   /**
    * Checks that the user is currently logged in. This is performed by looking
-   * at the "sessionToken" cookie that has been set in session during last
-   * call to createSession().
+   * at the "sessionToken" cookie that has been set in session during last call
+   * to createSession().
    * <p/>
-   * If the user is logged in, the method simply returns true. Otherwise,
-   * if the path of the login page has been set using @LoginPage or
-   * setLoginPage(), the user is redirected to it. Otherwise a 403 error is
-   * returned.
+   * If the user is logged in, the method simply returns true. Otherwise, if the
+   * path of the login page has been set using @LoginPage or setLoginPage(), the
+   * user is redirected to it. Otherwise a 403 error is returned.
    */
   public boolean checkLoggedIn(HttpExchange r) throws IOException {
     String token = getCookie(r, "sessionToken");
@@ -358,9 +355,12 @@ public class App {
     if (headers != null) {
       List<String> cookies = headers.get("Cookie");
       if (cookies != null) {
-        for (String s : cookies) {
-          if (s.startsWith(name) && s.charAt(name.length()) == '=') {
-            return s.substring(name.length() + 1);
+        for (String cookieString : cookies) {
+          String[] tokens = cookieString.split("\\s*;\\s*");
+          for (String token : tokens) {
+            if (token.startsWith(name) && token.charAt(name.length()) == '=') {
+              return token.substring(name.length() + 1);
+            }
           }
         }
       }
@@ -393,8 +393,8 @@ public class App {
   }
 
   /**
-   * Returns the default policy for checking whether user must be logged
-   * in to access all URLs by default.
+   * Returns the default policy for checking whether user must be logged in to
+   * access all URLs by default.
    */
   public boolean getRequireLoggedInByDefault() {
     return requireLoggedInByDefault;

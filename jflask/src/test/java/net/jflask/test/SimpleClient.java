@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
+import java.net.HttpCookie;
 import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 
@@ -45,7 +47,8 @@ public class SimpleClient {
   /**
    * POSTs data on the server at specified path and return results as string.
    */
-  public String post(String path, String data) throws IOException, URISyntaxException {
+  public String post(String path,
+                     String data) throws IOException, URISyntaxException {
     URL url = new URL(rootUrl + path);
     HttpURLConnection con = (HttpURLConnection) url.openConnection();
     con.setDoOutput(true);
@@ -55,5 +58,11 @@ public class SimpleClient {
 
     String resp = new String(IO.readFully(con.getInputStream()));
     return resp;
+  }
+
+  public void addCookie(String name, String value) {
+    HttpCookie cookie = new HttpCookie(name, value);
+    cookie.setPath("/");
+    cookies.getCookieStore().add(URI.create(rootUrl), cookie);
   }
 }
