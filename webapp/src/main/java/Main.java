@@ -27,7 +27,7 @@ public class Main {
         return "Hello " + name;
       }
     };
-    app.setPort(Integer.getInteger("port"));
+    app.setPort(Integer.getInteger("port", 8080));
     app.servePath("/", "app/");
     app.start();
     System.out.println("Listening on http://0.0.0.0:" + app.getPort());

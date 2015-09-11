@@ -38,14 +38,14 @@ For more examples, look at the [junits](https://github.com/pcdv/jflask/tree/mast
 
 Features
 --------
- - Minimal size (around 20kB)
+ - Minimal size (around 28kB)
  - No external dependencies (it uses [HTTP server](http://docs.oracle.com/javase/7/docs/jre/api/net/httpserver/spec/com/sun/net/httpserver/package-summary.html) embedded in the JRE)
  - Flask-like request routing (with method annotations)
  - Easy standalone jar generation (executable with`java -jar mywebapp.jar`)
 
 Requirements
 ------------
- - JRE 7
+ - JRE 7 (or later)
 
 
 

@@ -20,5 +20,5 @@ jar {
     // TODO: is there a way to include only required classes?
     configurations.compile.collect { it.isDirectory() ? it : project.zipTree(it) }
   }
-  manifest { attributes 'Main-Class': 'jbootweb.Main' }
+  manifest { attributes 'Main-Class': 'Main' }
 }
