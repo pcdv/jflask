@@ -30,7 +30,7 @@ public class RouteTestExtendsApp extends App {
 
   @Before
   public void setUp() throws IOException {
-    setPort(0); // use any available port instead of 8080
+    srv.setPort(0); // use any available port instead of 8080
     start();
   }
 

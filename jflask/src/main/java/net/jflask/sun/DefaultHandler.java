@@ -6,9 +6,27 @@ import com.sun.net.httpserver.HttpHandler;
 import java.io.IOException;
 import java.io.PrintStream;
 
+import net.jflask.App;
+import net.jflask.RequestHandler;
 import net.jflask.util.Log;
 
-public class DefaultHandler implements HttpHandler {
+public class DefaultHandler implements HttpHandler, RequestHandler {
+
+  protected final App app;
+
+  public DefaultHandler(App app) {
+    this.app = app;
+  }
+
+  @Override
+  public App getApp() {
+    return app;
+  }
+
+  @Override
+  public HttpHandler asHttpHandler() {
+    return this;
+  }
 
   public void handle(HttpExchange r) throws IOException {
     try {

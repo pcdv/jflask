@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 
 import com.sun.net.httpserver.HttpExchange;
+import net.jflask.App;
 import net.jflask.util.IO;
 import net.jflask.util.Log;
 
@@ -19,8 +20,10 @@ public abstract class AbstractResourceHandler extends DefaultHandler {
 
   private final ContentTypeProvider mime;
 
-  public AbstractResourceHandler(ContentTypeProvider mime,
+  public AbstractResourceHandler(App app,
+                                 ContentTypeProvider mime,
                                  String rootURI) {
+    super(app);
     this.mime = mime;
     this.rootURI = rootURI;
   }

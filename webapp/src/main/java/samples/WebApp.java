@@ -17,7 +17,7 @@ public class WebApp extends App {
     // from the webapp jar
     app.servePath("/", "app/");
 
-    app.setPort(Integer.getInteger("port", 8080));
+    app.getServer().setPort(Integer.getInteger("port", 8080));
     app.start();
     System.out.println("Listening on http://0.0.0.0:" + app.getPort());
   }

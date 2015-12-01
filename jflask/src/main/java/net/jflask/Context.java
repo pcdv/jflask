@@ -17,7 +17,7 @@ import net.jflask.util.Log;
  *
  * @author pcdv
  */
-public class Context implements HttpHandler {
+public class Context implements HttpHandler, RequestHandler {
 
   private static final String[] EMPTY = {};
 
@@ -95,5 +95,15 @@ public class Context implements HttpHandler {
                              mh.getMethod().getName(),
                              mh.getMethod().getDeclaringClass().getName()));
     }
+  }
+
+  @Override
+  public App getApp() {
+    return app;
+  }
+
+  @Override
+  public HttpHandler asHttpHandler() {
+    return this;
   }
 }

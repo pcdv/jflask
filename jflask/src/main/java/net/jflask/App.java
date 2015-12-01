@@ -10,13 +10,10 @@ import java.util.Comparator;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Random;
-import java.util.concurrent.ExecutorService;
 
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
 import net.jflask.sun.AbstractResourceHandler;
 import net.jflask.sun.ContentTypeProvider;
 import net.jflask.sun.DefaultContentTypeProvider;
@@ -27,10 +24,9 @@ import net.jflask.util.Log;
 
 /**
  * Encapsulates the server side of a web app: an HTTP server and some route
- * handlers. There must be only one instance of App in the application. If some
- * route handlers are defined in an external class (i.e. not extending the main
- * App), {@link #scan(Object)} must be called in order to detect them in an
- * instance of the class.
+ * handlers. If some route handlers are defined in an external class (i.e. not
+ * extending the main App), {@link #scan(Object)} must be called in order to
+ * detect them in an instance of the class.
  * <p/>
  * The App can be extended with some handlers:
  * <p/>
@@ -64,13 +60,19 @@ import net.jflask.util.Log;
  */
 public class App {
 
-  private int port = 8080;
+  protected final WebServer srv;
 
-  private ExecutorService pool;
+  /**
+   * Optional URL where the app is plugged.
+   */
+  private final String rootUrl;
 
-  private WebServer srv;
+  /**
+   * Indicates that we created the server so we are free to destroy it.
+   */
+  private boolean srvIsMine;
 
-  private final Map<String, HttpHandler> handlers = new Hashtable<>();
+  private final Map<String, RequestHandler> handlers = new Hashtable<>();
 
   private ContentTypeProvider mime = new DefaultContentTypeProvider();
 
@@ -88,23 +90,19 @@ public class App {
   private SessionManager sessionManager = new DefaultSessionManager();
 
   public App() {
+    this(new WebServer(8080, null));
+  }
+
+  public App(WebServer server) {
+    this(null, server);
+  }
+
+  public App(String rootUrl, WebServer server) {
+    this.srv = server;
+    this.rootUrl = rootUrl;
+
     // in case we are extended by a subclass with annotations
     scan(this);
-  }
-
-  public void setPort(int port) {
-    checkNotStarted();
-    this.port = port;
-  }
-
-  public void setExecutorService(ExecutorService pool) {
-    checkNotStarted();
-    this.pool = pool;
-  }
-
-  private void checkNotStarted() {
-    if (srv != null)
-      throw new IllegalStateException("Already started");
   }
 
   /**
@@ -156,14 +154,15 @@ public class App {
    * Gets or creates a Context for specified root URI.
    */
   private Context getContext(String rootURI) {
-    HttpHandler c = handlers.get(rootURI);
+    RequestHandler c = handlers.get(rootURI);
 
     if (c == null) {
       Log.debug("Creating context for " + rootURI);
-      handlers.put(rootURI, c = new Context(this, rootURI));
+      handlers.put(rootURI, c = new Context(this, makeAbsoluteUrl(rootURI)));
     }
     else if (!(c instanceof Context))
-      throw new IllegalStateException("A handler is already registered for: " + rootURI);
+      throw new IllegalStateException("A handler is already registered for: " +
+                                      rootURI);
     return (Context) c;
   }
 
@@ -177,20 +176,24 @@ public class App {
   }
 
   public void start() throws IOException {
-    srv = new WebServer(port, pool);
-    for (Entry<String, HttpHandler> e : handlers.entrySet()) {
+    for (Map.Entry<String, RequestHandler> e : handlers.entrySet()) {
       String path = e.getKey();
       if (path.isEmpty())
         path = "/";
-      srv.addHandler(path, e.getValue());
+      addHandlerInServer(path, e.getValue());
     }
+
+    if (!srv.isStarted())
+      srv.start();
+  }
+
+  @Deprecated
+  public void setPort(int port) {
+    srv.setPort(port);
   }
 
   public int getPort() {
-    // retrieves the actual port even if port 0 was given (for testing)
-    if (srv != null)
-      return srv.getPort();
-    return port;
+    return srv.getPort();
   }
 
   public void destroy() {
@@ -212,23 +215,37 @@ public class App {
     File file = new File(path);
     AbstractResourceHandler h;
     if (file.exists() && file.isDirectory())
-      h = new FileHandler(mime, rootURI, file);
+      h = new FileHandler(this, mime, makeAbsoluteUrl(rootURI), file);
     else
-      h = new ResourceHandler(mime, rootURI, path, loader);
+      h = new ResourceHandler(this, mime, makeAbsoluteUrl(rootURI), path, loader);
 
     handlers.put(rootURI, h);
-    if (srv != null)
-      srv.addHandler(rootURI, h);
+    if (srv.isStarted())
+      addHandlerInServer(rootURI, h);
 
     return this;
   }
 
+  private void addHandlerInServer(String uri, RequestHandler h) {
+    srv.addHandler(makeAbsoluteUrl(uri), h);
+  }
+
+  private String makeAbsoluteUrl(String uri) {
+    if (rootUrl != null) {
+      if (uri.startsWith("/"))
+        uri = rootUrl + uri;
+      else
+        uri = rootUrl + "/" + uri;
+    }
+    return uri;
+  }
+
   public App serveDir(String rootURI, File dir) {
-    FileHandler h = new FileHandler(mime, rootURI, dir);
+    FileHandler h = new FileHandler(this, mime, makeAbsoluteUrl(rootURI), dir);
 
     handlers.put(rootURI, h);
-    if (srv != null)
-      srv.addHandler(rootURI, h);
+    if (srv.isStarted())
+      addHandlerInServer(rootURI, h);
 
     return this;
   }
@@ -264,7 +281,7 @@ public class App {
   public StringBuilder dumpRoutes(StringBuilder b) {
 
     ArrayList<Context> contexts = new ArrayList<>();
-    for (HttpHandler h : handlers.values()) {
+    for (RequestHandler h : handlers.values()) {
       if (h instanceof Context)
         contexts.add((Context) h);
     }
@@ -332,8 +349,10 @@ public class App {
    * at the "sessionToken" cookie that has been set in session during last call
    * to createSession().
    * <p/>
-   * If the user is logged in, the method simply returns true. Otherwise, if the
-   * path of the login page has been set using @LoginPage or setLoginPage(), the
+   * If the user is logged in, the method simply returns true. Otherwise, if
+   * the
+   * path of the login page has been set using @LoginPage or setLoginPage(),
+   * the
    * user is redirected to it. Otherwise a 403 error is returned.
    */
   public boolean checkLoggedIn(HttpExchange r) throws IOException {
@@ -370,7 +389,8 @@ public class App {
 
   /**
    * Sets the path of the login page, to which redirect all URLs that require a
-   * logged in user. This method can be called directly, or otherwise one of the
+   * logged in user. This method can be called directly, or otherwise one of
+   * the
    * URL handler methods can be annotated with @LoginPage.
    *
    * @param path the path of the login page
@@ -420,5 +440,9 @@ public class App {
     String token = getCookie(x, "sessionToken");
     if (token != null)
       sessionManager.removeToken(token);
+  }
+
+  public WebServer getServer() {
+    return srv;
   }
 }

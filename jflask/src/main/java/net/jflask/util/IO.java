@@ -10,7 +10,7 @@ public class IO {
   /**
    * Reads specified input stream until it reaches EOF.
    */
-  public static final byte[] readFully(InputStream in) throws IOException {
+  public static byte[] readFully(InputStream in) throws IOException {
     ByteArrayOutputStream bout = new ByteArrayOutputStream();
     pipe(in, bout, false);
     return bout.toByteArray();

@@ -6,7 +6,7 @@ subprojects {
 
     project.sourceCompatibility = targetCompatibility = 1.7
 
-    version = "0.17-SNAPSHOT"
+    version = "0.17"
 
     repositories {
          mavenCentral()
@@ -30,6 +30,10 @@ project(':jflask') {
     repositories {
       ivy {
         url "../../jflask-ivy-repo"
+      }
+      ivy {
+        name "local"
+        url "${System.properties['user.home']}/.ivy2/local"
       }
     }
     publications {

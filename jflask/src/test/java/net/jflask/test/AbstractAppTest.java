@@ -3,6 +3,7 @@ package net.jflask.test;
 import java.io.IOException;
 
 import net.jflask.App;
+import net.jflask.sun.WebServer;
 import org.junit.After;
 import org.junit.Before;
 
@@ -14,8 +15,8 @@ public class AbstractAppTest {
 
   @Before
   public void setUp() throws IOException {
-    app = new App();
-    app.setPort(0);
+    WebServer ws = new WebServer(0, null);
+    app = new App(ws);
 
     preScan();
     app.scan(this);

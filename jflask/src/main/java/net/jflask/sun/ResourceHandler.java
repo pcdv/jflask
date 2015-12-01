@@ -3,6 +3,8 @@ package net.jflask.sun;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 
+import net.jflask.App;
+
 /**
  * Serves files nested in a jar from classpath.
  *
@@ -14,11 +16,12 @@ public class ResourceHandler extends AbstractResourceHandler {
 
   private final ClassLoader loader;
 
-  public ResourceHandler(ContentTypeProvider mime,
+  public ResourceHandler(App app,
+                         ContentTypeProvider mime,
                          String rootURI,
                          String localPath,
                          ClassLoader loader) {
-    super(mime, rootURI);
+    super(app, mime, rootURI);
     this.localPath = localPath;
     this.loader = loader;
   }

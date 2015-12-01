@@ -6,18 +6,23 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.nio.file.Path;
 
+import net.jflask.App;
+
 public class FileHandler extends AbstractResourceHandler {
 
   private final Path localPath;
 
-  public FileHandler(ContentTypeProvider mime, String rootURI, File localFile) {
-    super(mime, rootURI);
+  public FileHandler(App app,
+                     ContentTypeProvider mime,
+                     String rootURI,
+                     File localFile) {
+    super(app, mime, rootURI);
     this.localPath = localFile.toPath();
   }
 
   @Override
   protected InputStream openPath(String p) throws FileNotFoundException {
-    if(p.startsWith("/"))
+    if (p.startsWith("/"))
       p = p.substring(1);
     return new FileInputStream(localPath.resolve(p).toFile());
   }
