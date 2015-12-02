@@ -210,7 +210,7 @@ public class App {
   }
 
   public App servePath(String rootURI, String path) {
-    return servePath(rootURI, path, null);
+    return servePath(rootURI, path, null, requireLoggedInByDefault);
   }
 
   /**
@@ -220,17 +220,25 @@ public class App {
    * @param path NB: should end with a '/'
    * @return this
    */
-  public App servePath(String rootURI, String path, ClassLoader loader) {
+  public App servePath(String rootURI,
+                       String path,
+                       ClassLoader loader,
+                       boolean restricted) {
     File file = new File(path);
     AbstractResourceHandler h;
     if (file.exists() && file.isDirectory())
-      h = new FileHandler(this, mime, makeAbsoluteUrl(rootURI), file);
+      h = new FileHandler(this,
+                          mime,
+                          makeAbsoluteUrl(rootURI),
+                          file,
+                          restricted);
     else
       h = new ResourceHandler(this,
                               mime,
                               makeAbsoluteUrl(rootURI),
                               path,
-                              loader);
+                              loader,
+                              restricted);
 
     handlers.put(rootURI, h);
     if (started)
@@ -254,7 +262,12 @@ public class App {
   }
 
   public App serveDir(String rootURI, File dir) {
-    FileHandler h = new FileHandler(this, mime, makeAbsoluteUrl(rootURI), dir);
+    return serveDir(rootURI, dir, requireLoggedInByDefault);
+  }
+
+  public App serveDir(String rootURI, File dir, boolean restricted) {
+    FileHandler h =
+        new FileHandler(this, mime, makeAbsoluteUrl(rootURI), dir, restricted);
 
     handlers.put(rootURI, h);
     if (started)
@@ -357,16 +370,20 @@ public class App {
     return CustomResponse.INSTANCE;
   }
 
+  public void redirect(HttpExchange r, String location) throws IOException {
+    r.getResponseHeaders().add("Location", location);
+    r.sendResponseHeaders(HttpURLConnection.HTTP_MOVED_TEMP, 0);
+  }
+
   /**
    * Checks that the user is currently logged in. This is performed by looking
    * at the "sessionToken" cookie that has been set in session during last call
    * to createSession().
    * <p/>
-   * If the user is logged in, the method simply returns true. Otherwise, if
-   * the
-   * path of the login page has been set using @LoginPage or setLoginPage(),
-   * the
-   * user is redirected to it. Otherwise a 403 error is returned.
+   * If the user is logged in or if the URL being accessed is the login page,
+   * the method simply returns true. Otherwise, if the path of the login page
+   * has been set using @LoginPage or setLoginPage(), the user is redirected to
+   * it. Otherwise a 403 error is returned.
    */
   public boolean checkLoggedIn(HttpExchange r) throws IOException {
     String token = getCookie(r, "sessionToken");
@@ -374,8 +391,11 @@ public class App {
       return true;
     }
     else {
-      if (loginPage != null)
-        redirect(loginPage);
+      if (loginPage != null) {
+        if (r.getRequestURI().toString().equals(loginPage))
+          return true;
+        redirect(r, loginPage);
+      }
       else
         r.sendResponseHeaders(HttpURLConnection.HTTP_FORBIDDEN, -1);
       return false;

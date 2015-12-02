@@ -20,8 +20,8 @@ public class ResourceHandler extends AbstractResourceHandler {
                          ContentTypeProvider mime,
                          String rootURI,
                          String localPath,
-                         ClassLoader loader) {
-    super(app, mime, rootURI);
+                         ClassLoader loader, boolean restricted) {
+    super(app, mime, rootURI, restricted);
     this.localPath = localPath;
     this.loader = loader;
   }

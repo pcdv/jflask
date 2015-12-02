@@ -15,8 +15,9 @@ public class FileHandler extends AbstractResourceHandler {
   public FileHandler(App app,
                      ContentTypeProvider mime,
                      String rootURI,
-                     File localFile) {
-    super(app, mime, rootURI);
+                     File localFile,
+                     boolean restricted) {
+    super(app, mime, rootURI, restricted);
     this.localPath = localFile.toPath();
   }
 

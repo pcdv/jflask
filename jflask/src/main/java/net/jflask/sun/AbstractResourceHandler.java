@@ -18,18 +18,26 @@ public abstract class AbstractResourceHandler extends DefaultHandler {
 
   protected final String rootURI;
 
+  private final boolean restricted;
+
   private final ContentTypeProvider mime;
 
   public AbstractResourceHandler(App app,
                                  ContentTypeProvider mime,
-                                 String rootURI) {
+                                 String rootURI,
+                                 boolean restricted) {
     super(app);
     this.mime = mime;
     this.rootURI = rootURI;
+    this.restricted = restricted;
   }
 
   @Override
   public void doGet(HttpExchange t) throws Exception {
+
+    if (restricted && !app.checkLoggedIn(t))
+      return;
+
     String uri = t.getRequestURI().toString();
 
     // ignore query string
