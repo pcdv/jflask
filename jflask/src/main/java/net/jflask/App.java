@@ -89,6 +89,8 @@ public class App {
 
   private SessionManager sessionManager = new DefaultSessionManager();
 
+  private boolean started;
+
   public App() {
     this(new WebServer(8080, null));
   }
@@ -175,7 +177,14 @@ public class App {
     return converters.get(name);
   }
 
+  /**
+   * Registers all handlers in server and starts the server if not already
+   * running.
+   */
   public void start() throws IOException {
+    if (started)
+      throw new IllegalStateException("Already started");
+    started = true;
     for (Map.Entry<String, RequestHandler> e : handlers.entrySet()) {
       String path = e.getKey();
       if (path.isEmpty())
@@ -217,10 +226,14 @@ public class App {
     if (file.exists() && file.isDirectory())
       h = new FileHandler(this, mime, makeAbsoluteUrl(rootURI), file);
     else
-      h = new ResourceHandler(this, mime, makeAbsoluteUrl(rootURI), path, loader);
+      h = new ResourceHandler(this,
+                              mime,
+                              makeAbsoluteUrl(rootURI),
+                              path,
+                              loader);
 
     handlers.put(rootURI, h);
-    if (srv.isStarted())
+    if (started)
       addHandlerInServer(rootURI, h);
 
     return this;
@@ -244,7 +257,7 @@ public class App {
     FileHandler h = new FileHandler(this, mime, makeAbsoluteUrl(rootURI), dir);
 
     handlers.put(rootURI, h);
-    if (srv.isStarted())
+    if (started)
       addHandlerInServer(rootURI, h);
 
     return this;
@@ -396,7 +409,7 @@ public class App {
    * @param path the path of the login page
    */
   public void setLoginPage(String path) {
-    this.loginPage = path;
+    this.loginPage = makeAbsoluteUrl(path);
   }
 
   /**

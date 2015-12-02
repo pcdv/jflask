@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import net.jflask.App;
 import net.jflask.sun.WebServer;
+import net.jflask.test.util.SimpleClient;
 import org.junit.After;
 import org.junit.Before;
 

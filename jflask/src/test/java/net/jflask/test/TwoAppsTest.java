@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import net.jflask.App;
 import net.jflask.Route;
 import net.jflask.sun.WebServer;
+import net.jflask.test.util.SimpleClient;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;

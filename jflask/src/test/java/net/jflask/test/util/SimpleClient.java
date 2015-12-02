@@ -1,4 +1,4 @@
-package net.jflask.test;
+package net.jflask.test.util;
 
 import java.io.IOException;
 import java.net.CookieHandler;
@@ -10,6 +10,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 
+import net.jflask.sun.WebServer;
 import net.jflask.util.IO;
 
 /**
@@ -34,6 +35,10 @@ public class SimpleClient {
     // WTF: there is no non-static way to bind a CookieHandler to an
     // URLConnection!
     CookieHandler.setDefault(cookies);
+  }
+
+  public SimpleClient(WebServer ws) {
+    this("http://localhost:"+ws.getPort());
   }
 
   /**
