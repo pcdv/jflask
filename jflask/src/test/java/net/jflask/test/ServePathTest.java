@@ -75,4 +75,15 @@ public class ServePathTest {
     Assert.assertEquals("Please login", client.get("/static/anything"));
   }
 
+  @Test
+  public void testServeRootWithProtectedAccessAndClassLoader() throws Exception {
+    app = new App();
+    app.servePath("/", "/test-resources/", getClass().getClassLoader(), true);
+    app.setLoginPage("/login.html");
+    app.start();
+
+    SimpleClient client = new SimpleClient(app.getServer());
+    Assert.assertEquals("Please login", client.get("/static/anything"));
+  }
+
 }

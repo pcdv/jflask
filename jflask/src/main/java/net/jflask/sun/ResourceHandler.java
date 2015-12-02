@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 
 import net.jflask.App;
+import net.jflask.util.Log;
 
 /**
  * Serves files nested in a jar from classpath.
@@ -20,7 +21,8 @@ public class ResourceHandler extends AbstractResourceHandler {
                          ContentTypeProvider mime,
                          String rootURI,
                          String localPath,
-                         ClassLoader loader, boolean restricted) {
+                         ClassLoader loader,
+                         boolean restricted) {
     super(app, mime, rootURI, restricted);
     if (!localPath.endsWith("/"))
       localPath += "/";
@@ -35,8 +37,21 @@ public class ResourceHandler extends AbstractResourceHandler {
     if (!p.startsWith("/"))
       p = "/" + p;
 
-    InputStream in = loader == null ? getClass().getResourceAsStream(p)
-                                    : loader.getResourceAsStream(p);
+    // getResourceAsStream() fails when reading from a jar if a / is doubled!
+    p = p.replace("//", "/");
+
+    if (Log.DEBUG)
+      Log.debug("Trying to open " + p + " with loader " + loader);
+
+    InputStream in;
+
+    // behaviour is not the same via class or class loader!!!
+    if (loader == null)
+      in = getClass().getResourceAsStream(p);
+    else {
+      in = loader.getResourceAsStream(p.substring(1));
+    }
+
     if (in == null)
       throw new FileNotFoundException(p);
 
