@@ -209,6 +209,10 @@ public class App {
     srv.close();
   }
 
+  /**
+   * WARNING: if rootURI == "/" beware of conflicts with other handlers with
+   * root URLs like "/foo": they will conflict with the resource handler.
+   */
   public App servePath(String rootURI, String path) {
     return servePath(rootURI, path, null, requireLoggedInByDefault);
   }
@@ -216,8 +220,9 @@ public class App {
   /**
    * Serves the contents of a given path (which may be a directory on the file
    * system or nested in a jar from the classpath) from a given root URI.
+   * WARNING: if rootURI == "/" beware of conflicts with other handlers with
+   * root URLs like "/foo": they will conflict with the resource handler.
    *
-   * @param path NB: should end with a '/'
    * @return this
    */
   public App servePath(String rootURI,
@@ -261,6 +266,10 @@ public class App {
     return uri;
   }
 
+  /**
+   * WARNING: if rootURI == "/" beware of conflicts with other handlers
+   * with root URLs like "/foo": they will conflict with the resource handler.
+   */
   public App serveDir(String rootURI, File dir) {
     return serveDir(rootURI, dir, requireLoggedInByDefault);
   }

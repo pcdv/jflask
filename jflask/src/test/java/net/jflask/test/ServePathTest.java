@@ -4,25 +4,33 @@ import net.jflask.App;
 import net.jflask.Route;
 import net.jflask.sun.WebServer;
 import net.jflask.test.util.SimpleClient;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 
-/**
- * Reproduce bug with handler registered twice in server when server started
- * before app.
- */
 public class ServePathTest {
+
+  private App app;
+
+  @After
+  public void tearDown() throws Exception {
+    app.destroy();
+  }
 
   @Route("/test")
   public String test() {
     return "OK";
   }
 
+  /**
+   * Reproduce bug with handler registered twice in server when server started
+   * before app.
+   */
   @Test
   public void testStartServerBeforeServePath() throws Exception {
     WebServer ws = new WebServer(0, null);
     ws.start();
-    App app = new App("/app", ws);
+    app = new App("/app", ws);
     app.servePath("/static", "/test-resources");
     app.start();
 
@@ -34,7 +42,7 @@ public class ServePathTest {
   public void testRedirectLoginToResource() throws Exception {
     WebServer ws = new WebServer(0, null);
     ws.start();
-    App app = new App("/app", ws);
+    app = new App("/app", ws);
     app.servePath("/static", "/test-resources");
     app.setRequireLoggedInByDefault(true);
     app.setLoginPage("/static/login.html");
@@ -47,7 +55,7 @@ public class ServePathTest {
 
   @Test
   public void testServePathWithProtectedAccess() throws Exception {
-    App app = new App();
+    app = new App();
     app.servePath("/static", "/test-resources", null, true);
     app.setLoginPage("/static/login.html");
     app.start();
@@ -55,4 +63,16 @@ public class ServePathTest {
     SimpleClient client = new SimpleClient(app.getServer());
     Assert.assertEquals("Please login", client.get("/static/anything"));
   }
+
+  @Test
+  public void testServeRootWithProtectedAccess() throws Exception {
+    app = new App();
+    app.servePath("/", "/test-resources/", null, true);
+    app.setLoginPage("/login.html");
+    app.start();
+
+    SimpleClient client = new SimpleClient(app.getServer());
+    Assert.assertEquals("Please login", client.get("/static/anything"));
+  }
+
 }

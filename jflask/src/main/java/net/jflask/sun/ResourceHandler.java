@@ -22,6 +22,8 @@ public class ResourceHandler extends AbstractResourceHandler {
                          String localPath,
                          ClassLoader loader, boolean restricted) {
     super(app, mime, rootURI, restricted);
+    if (!localPath.endsWith("/"))
+      localPath += "/";
     this.localPath = localPath;
     this.loader = loader;
   }
