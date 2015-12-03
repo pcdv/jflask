@@ -67,6 +67,8 @@ public class App {
    */
   private final String rootUrl;
 
+  private String sessionTokenCookie = "sessionToken";
+
   /**
    * Indicates that we created the server so we are free to destroy it.
    */
@@ -105,6 +107,15 @@ public class App {
 
     // in case we are extended by a subclass with annotations
     scan(this);
+  }
+
+  /**
+   * Changes the name of the cookie in which the session token is stored. This
+   * allows to have several web apps sharing a same host address (eg. using a
+   * different port).
+   */
+  public void setSessionTokenCookie(String cookie) {
+    this.sessionTokenCookie = cookie;
   }
 
   /**
@@ -347,7 +358,7 @@ public class App {
    */
   public void loginUser(String login, boolean rememberMe, String token) {
     sessionManager.createToken(token, login, rememberMe);
-    getResponse().addHeader("Set-Cookie", "sessionToken=" + token);
+    getResponse().addHeader("Set-Cookie", sessionTokenCookie + "=" + token+"; path=/;");
   }
 
   public void setSessionManager(SessionManager mgr) {
@@ -359,8 +370,8 @@ public class App {
    * associated with session using {@link #loginUser(String)}.
    */
   public String getCurrentLogin() {
-    String token =
-        getCookie(((SunRequest) getRequest()).getExchange(), "sessionToken");
+    String token = getCookie(((SunRequest) getRequest()).getExchange(),
+                             sessionTokenCookie);
     return sessionManager.getLogin(token);
   }
 
@@ -384,6 +395,10 @@ public class App {
     r.sendResponseHeaders(HttpURLConnection.HTTP_MOVED_TEMP, 0);
   }
 
+  public CustomResponse redirectToLogin() {
+    return redirect(loginPage);
+  }
+
   /**
    * Checks that the user is currently logged in. This is performed by looking
    * at the "sessionToken" cookie that has been set in session during last call
@@ -395,18 +410,21 @@ public class App {
    * it. Otherwise a 403 error is returned.
    */
   public boolean checkLoggedIn(HttpExchange r) throws IOException {
-    String token = getCookie(r, "sessionToken");
+    String token = getCookie(r, sessionTokenCookie);
     if (token != null && sessionManager.isTokenValid(token)) {
       return true;
     }
     else {
       if (loginPage != null) {
-        if (r.getRequestURI().toString().equals(loginPage))
+        if (r.getRequestURI().toString().startsWith(loginPage))
           return true;
-        redirect(r, loginPage);
+        Log.debug("Redirecting to login page: " + r.getRequestURI());
+        redirect(r, loginPage + "?url=" + r.getRequestURI());
       }
-      else
+      else {
+        Log.debug("Forbidden (not logged in): " + r.getRequestURI());
         r.sendResponseHeaders(HttpURLConnection.HTTP_FORBIDDEN, -1);
+      }
       return false;
     }
   }
@@ -432,8 +450,7 @@ public class App {
   /**
    * Sets the path of the login page, to which redirect all URLs that require a
    * logged in user. This method can be called directly, or otherwise one of
-   * the
-   * URL handler methods can be annotated with @LoginPage.
+   * the URL handler methods can be annotated with @LoginPage.
    *
    * @param path the path of the login page
    */
@@ -479,7 +496,7 @@ public class App {
    */
   public void logoutUser() {
     HttpExchange x = ((SunRequest) getRequest()).getExchange();
-    String token = getCookie(x, "sessionToken");
+    String token = getCookie(x, sessionTokenCookie);
     if (token != null)
       sessionManager.removeToken(token);
   }
@@ -487,4 +504,5 @@ public class App {
   public WebServer getServer() {
     return srv;
   }
+
 }
