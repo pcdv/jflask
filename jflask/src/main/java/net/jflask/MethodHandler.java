@@ -90,7 +90,8 @@ public class MethodHandler implements Comparable<MethodHandler> {
   public void configure() {
     if (m.getDeclaredAnnotation(LoginRequired.class) != null)
       loginRequired = true;
-    else if (m.getDeclaredAnnotation(LoginNotRequired.class) != null || m.getDeclaredAnnotation(LoginPage.class) != null)
+    else if (m.getDeclaredAnnotation(LoginNotRequired.class) != null || m.getDeclaredAnnotation(
+        LoginPage.class) != null)
       loginRequired = false;
     else
       loginRequired = ctx.app.getRequireLoggedInByDefault();
@@ -134,14 +135,16 @@ public class MethodHandler implements Comparable<MethodHandler> {
 
     if (Log.DEBUG)
       Log.debug("Invoking " + obj.getClass()
-                                 .getSimpleName() + "." + m.getName() + Arrays.toString(args));
+                                 .getSimpleName() + "." + m.getName() + Arrays.toString(
+          args));
 
-    return processResponse(r, resp, m.invoke(obj, args));
+    return processResponse(r, resp, m.invoke(obj, args), m);
   }
 
   private boolean processResponse(HttpExchange r,
                                   Response resp,
-                                  Object res) throws Exception {
+                                  Object res,
+                                  Method m) throws Exception {
     if (converter != null) {
       converter.convert(res, resp);
     }
@@ -164,7 +167,7 @@ public class MethodHandler implements Comparable<MethodHandler> {
       IO.pipe((InputStream) res, r.getResponseBody(), false);
     }
     else
-      throw new RuntimeException("Unexpected return value: " + res);
+      throw new RuntimeException("Unexpected return value: " + res + " from " + m.toGenericString());
 
     return true;
   }
@@ -198,7 +201,8 @@ public class MethodHandler implements Comparable<MethodHandler> {
     }
 
     for (int i = 0; i < tok.length; i++) {
-      if (tok[i].charAt(0) != ':' && tok[i].charAt(0) != '*' && !tok[i].equals(uri[i]))
+      if (tok[i].charAt(0) != ':' && tok[i].charAt(0) != '*' && !tok[i].equals(
+          uri[i]))
         return false;
     }
 
