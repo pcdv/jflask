@@ -45,7 +45,7 @@ public class Context implements HttpHandler, RequestHandler {
                                   Method m,
                                   Object obj) {
     Log.debug("Add handler for " + route.method() + " on " + rootURI + uri);
-    MethodHandler handler = new MethodHandler(this, uri, m, obj, route);
+    MethodHandler handler = new MethodHandler(this, uri, m, obj);
     handlers.add(handler);
     return handler;
   }

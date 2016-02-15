@@ -1,5 +1,6 @@
 package net.jflask.test;
 
+import net.jflask.Post;
 import net.jflask.Route;
 import org.junit.Test;
 
@@ -10,7 +11,8 @@ import static org.junit.Assert.assertEquals;
  */
 public class PostTest extends AbstractAppTest {
 
-  @Route(value = "/form", method = "POST")
+  @Post
+  @Route("/form")
   public String postLogin() {
     return app.getRequest().getForm("login");
   }

@@ -1,5 +1,6 @@
 package net.jflask.test;
 
+import net.jflask.Convert;
 import net.jflask.Response;
 import net.jflask.ResponseConverter;
 import net.jflask.Route;
@@ -9,7 +10,8 @@ import static org.junit.Assert.assertEquals;
 
 public class ConverterTest extends AbstractAppTest {
 
-  @Route(value = "/hello/:name", converter = "STAR")
+  @Convert("STAR")
+  @Route("/hello/:name")
   public String hello(String name) {
     return "Hello " + name;
   }

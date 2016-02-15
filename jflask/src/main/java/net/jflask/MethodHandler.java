@@ -18,16 +18,24 @@ public class MethodHandler implements Comparable<MethodHandler> {
 
   private static final String[] EMPTY = {};
 
-  /** The HTTP method */
-  private final String verb;
+  /**
+   * The HTTP method
+   */
+  private final String requestMethod;
 
-  /** The method to invoke to process request. */
-  private final Method m;
+  /**
+   * The method to invoke to process requests.
+   */
+  private final Method method;
 
-  /** The object to invoke method on. */
-  private final Object obj;
+  /**
+   * The object to invoke method on.
+   */
+  private final Object target;
 
-  /** The split URI, eg. { "hello", ":name" } */
+  /**
+   * The split URI, eg. { "hello", ":name" }
+   */
   private final String[] tok;
 
   /**
@@ -36,13 +44,13 @@ public class MethodHandler implements Comparable<MethodHandler> {
    */
   private final int[] idx;
 
+  private final String converterName;
+
   private boolean loginRequired;
 
   private int splat = -1;
 
   private final String rootURI;
-
-  private final Route route;
 
   private final Context ctx;
 
@@ -51,36 +59,57 @@ public class MethodHandler implements Comparable<MethodHandler> {
 
   private final String uri;
 
-  public MethodHandler(Context ctx,
-                       String uri,
-                       Method m,
-                       Object obj,
-                       Route route) {
+  public MethodHandler(Context ctx, String uri, Method method, Object target) {
     this.ctx = ctx;
     this.uri = uri;
     this.rootURI = uri;
-    this.verb = route.method();
-    this.m = m;
-    this.obj = obj;
-    this.route = route;
+    this.requestMethod = initHttpRequest(method);
+    this.converterName = initConverterName(method);
+    this.method = method;
+    this.target = target;
     this.tok = uri.isEmpty() ? EMPTY : uri.substring(1).split("/");
     this.idx = calcIndexes(tok);
 
-    if (m.getDeclaredAnnotation(LoginPage.class) != null)
+    if (method.getDeclaredAnnotation(LoginPage.class) != null)
       ctx.app.setLoginPage(ctx.getRootURI() + uri);
 
     configure();
 
     // hack for being able to call method even if not public or if the class
     // is not public
-    if (!m.isAccessible())
-      m.setAccessible(true);
+    if (!method.isAccessible())
+      method.setAccessible(true);
 
-    for (Class<?> c : m.getParameterTypes()) {
+    for (Class<?> c : method.getParameterTypes()) {
       if (c != String.class)
         throw new RuntimeException//
-                  ("Only String supported in method arguments (for now): " + m);
+                  ("Only String supported in method arguments (for now): " +
+                   method);
     }
+  }
+
+  private static String initConverterName(Method m) {
+    Convert c = m.getAnnotation(Convert.class);
+    if (c != null)
+      return c.value();
+
+    Route route = m.getAnnotation(Route.class);
+    if (route.converter().isEmpty())
+      return null;
+    return route.converter();
+  }
+
+  private static String initHttpRequest(Method m) {
+    if (m.getAnnotation(Post.class) != null)
+      return "POST";
+    if (m.getAnnotation(Put.class) != null)
+      return "PUT";
+    if (m.getAnnotation(Patch.class) != null)
+      return "PATCH";
+    if (m.getAnnotation(Delete.class) != null)
+      return "DELETE";
+    Route route = m.getAnnotation(Route.class);
+    return route.method();
   }
 
   /**
@@ -88,15 +117,16 @@ public class MethodHandler implements Comparable<MethodHandler> {
    * require adaptation in handlers.
    */
   public void configure() {
-    if (m.getDeclaredAnnotation(LoginRequired.class) != null)
+    if (method.getDeclaredAnnotation(LoginRequired.class) != null)
       loginRequired = true;
-    else if (m.getDeclaredAnnotation(LoginNotRequired.class) != null || m.getDeclaredAnnotation(LoginPage.class) != null)
+    else if (method.getDeclaredAnnotation(LoginNotRequired.class) != null ||
+             method.getDeclaredAnnotation(LoginPage.class) != null)
       loginRequired = false;
     else
       loginRequired = ctx.app.getRequireLoggedInByDefault();
 
-    if (this.converter == null && !route.converter().isEmpty())
-      this.converter = ctx.app.getConverter(route.converter());
+    if (this.converter == null && converterName != null)
+      this.converter = ctx.app.getConverter(converterName);
   }
 
   private int[] calcIndexes(String[] tok) {
@@ -133,10 +163,11 @@ public class MethodHandler implements Comparable<MethodHandler> {
     Object[] args = extractArgs(uri);
 
     if (Log.DEBUG)
-      Log.debug("Invoking " + obj.getClass()
-                                 .getSimpleName() + "." + m.getName() + Arrays.toString(args));
+      Log.debug("Invoking " + target.getClass().getSimpleName() + "." +
+                method.getName() +
+                Arrays.toString(args));
 
-    return processResponse(r, resp, m.invoke(obj, args));
+    return processResponse(r, resp, method.invoke(target, args));
   }
 
   private boolean processResponse(HttpExchange r,
@@ -145,8 +176,9 @@ public class MethodHandler implements Comparable<MethodHandler> {
     if (converter != null) {
       converter.convert(res, resp);
     }
-    else if (!route.converter().isEmpty()) {
-      throw new IllegalStateException("Converter " + route.converter() + " not registered in App.");
+    else if (converterName != null) {
+      throw new IllegalStateException("Converter '" + converterName +
+                                      "' not registered in App.");
     }
     else if (res instanceof CustomResponse) {
       // do nothing: status and headers should already be set
@@ -189,7 +221,7 @@ public class MethodHandler implements Comparable<MethodHandler> {
    * Checks whether current handler should respond to specified request.
    */
   private boolean isApplicable(HttpExchange r, String[] uri) {
-    if (!r.getRequestMethod().equals(this.verb))
+    if (!r.getRequestMethod().equals(this.requestMethod))
       return false;
 
     if (uri.length != tok.length) {
@@ -198,7 +230,8 @@ public class MethodHandler implements Comparable<MethodHandler> {
     }
 
     for (int i = 0; i < tok.length; i++) {
-      if (tok[i].charAt(0) != ':' && tok[i].charAt(0) != '*' && !tok[i].equals(uri[i]))
+      if (tok[i].charAt(0) != ':' && tok[i].charAt(0) != '*' &&
+          !tok[i].equals(uri[i]))
         return false;
     }
 
@@ -207,7 +240,7 @@ public class MethodHandler implements Comparable<MethodHandler> {
 
   public int compareTo(MethodHandler o) {
     if (Arrays.equals(tok, o.tok))
-      return verb.compareTo(o.verb);
+      return requestMethod.compareTo(o.requestMethod);
     return uri.compareTo(o.uri);
   }
 
@@ -216,11 +249,11 @@ public class MethodHandler implements Comparable<MethodHandler> {
   }
 
   public String getVerb() {
-    return verb;
+    return requestMethod;
   }
 
   public Method getMethod() {
-    return m;
+    return method;
   }
 
 }
