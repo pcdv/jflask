@@ -6,7 +6,7 @@ subprojects {
 
     project.sourceCompatibility = targetCompatibility = 1.7
 
-    version = "0.22-SNAPSHOT"
+    version = "0.22"
 
     repositories {
          mavenCentral()

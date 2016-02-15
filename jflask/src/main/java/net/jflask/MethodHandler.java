@@ -196,7 +196,8 @@ public class MethodHandler implements Comparable<MethodHandler> {
       IO.pipe((InputStream) res, r.getResponseBody(), false);
     }
     else
-      throw new RuntimeException("Unexpected return value: " + res);
+      throw new RuntimeException("Unexpected return value: " + res + " from " +
+                                 method.toGenericString());
 
     return true;
   }

@@ -109,6 +109,10 @@ public class App {
     scan(this);
   }
 
+  public String getRootUrl() {
+    return rootUrl;
+  }
+
   /**
    * Changes the name of the cookie in which the session token is stored. This
    * allows to have several web apps sharing a same host address (eg. using a
