@@ -39,6 +39,11 @@ public class TwoAppsTest {
       public String hello() {
         return "Hello from app1";
       }
+
+      @Route("/:id/arg")
+      public String test(String id) {
+        return "OK:" + id;
+      }
     };
 
     app2 = new App("/app2", ws) {
@@ -70,5 +75,12 @@ public class TwoAppsTest {
     Files.write(tmp.newFile("foo").toPath(), "Foobar".getBytes());
     app1.serveDir("/stuff", tmp.getRoot());
     assertEquals("Foobar", client.get("/app1/stuff/foo"));
+  }
+
+  @Test
+  public void testWithArg() throws Exception {
+    assertEquals("OK:foo", client.get("/app1/foo/arg"));
+
+
   }
 }

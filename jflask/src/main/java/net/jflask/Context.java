@@ -57,17 +57,18 @@ public class Context implements HttpHandler, RequestHandler {
   public void handle(HttpExchange r) throws IOException {
     SunRequest req = new SunRequest(r);
     app.setThreadLocalRequest(req);
-    String uri = req.getRequestURI().substring(rootURI.length());
+    String uri = makeRelativeURI(req.getRequestURI());
     try {
       String[] tok = (uri.isEmpty() || uri.equals("/")) ? EMPTY
-                                                        : uri.substring(1)
-                                                             .split("/");
+                                                        : trimLeftSlash(uri).split(
+                                                            "/");
       for (MethodHandler h : handlers) {
         if (h.handle(r, tok, req)) {
           return;
         }
       }
-      Log.warn("No handler found for: " + r.getRequestMethod() + " " + req.getRequestURI());
+      Log.warn("No handler found for: " + r.getRequestMethod() + " " +
+               req.getRequestURI());
 
       r.sendResponseHeaders(404, 0);
     }
@@ -80,6 +81,20 @@ public class Context implements HttpHandler, RequestHandler {
     } finally {
       r.getResponseBody().close();
     }
+  }
+
+  private String makeRelativeURI(String uri) {
+    if (rootURI.endsWith("/"))
+      return uri.substring(rootURI.length() - 1);
+    else
+      return uri.substring(rootURI.length());
+  }
+
+  private String trimLeftSlash(String uri) {
+    if (uri.startsWith("/"))
+      return uri.substring(1);
+    else
+      return uri;
   }
 
   public void dumpUrls(StringBuilder b) {
