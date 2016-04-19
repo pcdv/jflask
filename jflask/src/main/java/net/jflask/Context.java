@@ -2,6 +2,7 @@ package net.jflask;
 
 import java.io.IOException;
 import java.io.PrintStream;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -70,13 +71,20 @@ public class Context implements HttpHandler, RequestHandler {
       Log.warn("No handler found for: " + r.getRequestMethod() + " " +
                req.getRequestURI());
 
+      app.fireError(404, req, null);
+
       r.sendResponseHeaders(404, 0);
     }
-    catch (Exception ex) {
-      Log.error(ex, ex);
+    catch (Throwable t) {
+
+      if (t instanceof InvocationTargetException)
+        t = ((InvocationTargetException) t).getTargetException();
+
+      app.fireError(500, req, t);
+      Log.error(t, t);
       r.sendResponseHeaders(500, 0);
       if (app.isDebugEnabled()) {
-        ex.printStackTrace(new PrintStream(r.getResponseBody()));
+        t.printStackTrace(new PrintStream(r.getResponseBody()));
       }
     } finally {
       r.getResponseBody().close();

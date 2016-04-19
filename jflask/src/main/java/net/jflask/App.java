@@ -11,6 +11,7 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Vector;
 
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
@@ -92,6 +93,10 @@ public class App {
   private SessionManager sessionManager = new DefaultSessionManager();
 
   private boolean started;
+
+  private Vector<ErrorHandler> errorHandlers = new Vector<>();
+
+  private Vector<SuccessHandler> successHandlers = new Vector<>();
 
   public App() {
     this(new WebServer(8080, null));
@@ -176,6 +181,9 @@ public class App {
     if (c == null) {
       Log.debug("Creating context for " + rootURI);
       handlers.put(rootURI, c = new Context(this, makeAbsoluteUrl(rootURI)));
+      if (started)
+        addHandlerInServer(rootURI, c);
+
     }
     else if (!(c instanceof Context))
       throw new IllegalStateException("A handler is already registered for: " +
@@ -362,7 +370,8 @@ public class App {
    */
   public void loginUser(String login, boolean rememberMe, String token) {
     sessionManager.createToken(token, login, rememberMe);
-    getResponse().addHeader("Set-Cookie", sessionTokenCookie + "=" + token+"; path=/;");
+    getResponse().addHeader("Set-Cookie",
+                            sessionTokenCookie + "=" + token + "; path=/;");
   }
 
   public void setSessionManager(SessionManager mgr) {
@@ -509,4 +518,37 @@ public class App {
     return srv;
   }
 
+  /**
+   * Adds a handler that will be notified whenever a request is rejected
+   */
+  public void addErrorHandler(ErrorHandler hook) {
+    // force presence of root context to detect unknown URLs
+    getContext("/");
+    errorHandlers.add(hook);
+  }
+
+  /**
+   * Adds a handler that will be notified whenever a request is successful
+   */
+  public void addSuccessHandler(SuccessHandler hook) {
+    successHandlers.add(hook);
+  }
+
+  void fireError(int status, Request req, Throwable t) {
+    for (ErrorHandler errorHandler : errorHandlers) {
+      try {
+        errorHandler.onError(status, req, t);
+      }
+      catch (Exception e) {
+        Log.error(e, e);
+      }
+    }
+  }
+
+  public void fireSuccess(Method method, Object[] args, Object res) {
+    Request r = getRequest();
+    for (SuccessHandler successHandler : successHandlers) {
+      successHandler.onSuccess(r, method, args, res);
+    }
+  }
 }

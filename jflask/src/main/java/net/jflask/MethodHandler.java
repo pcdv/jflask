@@ -148,6 +148,10 @@ public class MethodHandler implements Comparable<MethodHandler> {
     return Arrays.copyOf(res, j);
   }
 
+  /**
+   * @return true when request was handled, false when it was ignored (eg. not
+   * applicable)
+   */
   @SuppressWarnings("unchecked")
   public boolean handle(HttpExchange r,
                         String[] uri,
@@ -167,7 +171,11 @@ public class MethodHandler implements Comparable<MethodHandler> {
                 method.getName() +
                 Arrays.toString(args));
 
-    return processResponse(r, resp, method.invoke(target, args));
+    Object res = method.invoke(target, args);
+
+    ctx.app.fireSuccess(method, args, res);
+
+    return processResponse(r, resp, res);
   }
 
   private boolean processResponse(HttpExchange r,
