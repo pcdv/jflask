@@ -77,8 +77,15 @@ public class Context implements HttpHandler, RequestHandler {
     }
     catch (Throwable t) {
 
-      if (t instanceof InvocationTargetException)
+      if (t instanceof InvocationTargetException) {
         t = ((InvocationTargetException) t).getTargetException();
+
+        if (t instanceof HttpError) {
+          r.sendResponseHeaders(((HttpError) t).getStatus(), 0);
+          r.getResponseBody().write(t.getMessage().getBytes("UTF-8"));
+          return;
+        }
+      }
 
       app.fireError(500, req, t);
       Log.error(t, t);

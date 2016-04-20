@@ -68,18 +68,14 @@ public class HookTest extends AbstractAppTest {
                             Method method,
                             Object[] args,
                             Object result) {
-        queue.offer(r.getRequestURI() + " " + method.getName() + " " +
+        queue.offer(r.getRequestURI() + " " + method.getName() +
                     Arrays.toString(args) + " " + result);
       }
     });
 
-    try {
-      client.get("/hello/world");
-    }
-    catch (IOException e) {
-    }
+    client.get("/hello/world");
 
-    Assert.assertEquals("/hello/world getOk [world] Hello world",
+    Assert.assertEquals("/hello/world getOk[world] Hello world",
                         queue.poll(1, TimeUnit.SECONDS));
 
   }
