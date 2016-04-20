@@ -219,6 +219,14 @@ public class App {
       srv.start();
   }
 
+  /**
+   * @deprecated The port is now set in the WebServer instance, that may be
+   *             shared between multiple App instances. Either set the port
+   *             at App/WebServer creation:
+   *             <code>new App(new WebServer(port, executor))</code>
+   *             or set it directly on the server:
+   *             <code>app.getServer().setPort()</code>
+   */
   @Deprecated
   public void setPort(int port) {
     srv.setPort(port);
