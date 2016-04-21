@@ -6,14 +6,21 @@ import java.util.Arrays;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
+import org.junit.Assert;
+import org.junit.Test;
+
 import net.jflask.ErrorHandler;
 import net.jflask.Request;
 import net.jflask.Route;
 import net.jflask.SuccessHandler;
-import org.junit.Assert;
-import org.junit.Test;
 
 public class HookTest extends AbstractAppTest {
+
+  /** This one conflicts with initial declaration for ErrorHandler. */
+  @Route("/")
+  public String root() {
+    return "root";
+  }
 
   @Route("/barf")
   public String barf() {
@@ -56,6 +63,9 @@ public class HookTest extends AbstractAppTest {
 
     Assert.assertEquals("500 /barf java.lang.RuntimeException: barf",
                         queue.poll(1, TimeUnit.SECONDS));
+
+    Assert.assertEquals("root", client.get("/"));
+    Assert.assertNull(queue.poll(500, TimeUnit.MILLISECONDS));
   }
 
   @Test
@@ -78,5 +88,7 @@ public class HookTest extends AbstractAppTest {
     Assert.assertEquals("/hello/world getOk[world] Hello world",
                         queue.poll(1, TimeUnit.SECONDS));
 
+    Assert.assertEquals("root", client.get("/"));
+    Assert.assertEquals("/ root[] root", queue.poll(1, TimeUnit.SECONDS));
   }
 }
