@@ -181,6 +181,9 @@ public class App {
    * Gets or creates a Context for specified root URI.
    */
   private Context getContext(String rootURI) {
+    if ("/".equals(rootURI))
+      rootURI = "";
+
     RequestHandler c = handlers.get(rootURI);
 
     if (c == null) {
