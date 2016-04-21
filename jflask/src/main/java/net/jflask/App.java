@@ -99,7 +99,12 @@ public class App {
   private Vector<SuccessHandler> successHandlers = new Vector<>();
 
   public App() {
-    this(new WebServer(8080, null));
+    this(8080);
+  }
+
+  public App(int port) {
+    this(new WebServer(port, null));
+    srvIsMine = true;
   }
 
   public App(WebServer server) {
@@ -237,7 +242,8 @@ public class App {
   }
 
   public void destroy() {
-    srv.close();
+    if (srvIsMine)
+      srv.close();
   }
 
   /**
