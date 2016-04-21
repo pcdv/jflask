@@ -21,6 +21,11 @@ public interface Request {
    */
 
   String getQueryString();
+  
+  /**
+   * Returns the HTTP verb (GET, POST, etc.) used in the request.
+   */
+  String getMethod();
 
   /**
    * Returns parameter submitted in the query string, eg. if URL =
