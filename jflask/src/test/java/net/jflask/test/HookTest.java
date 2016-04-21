@@ -43,7 +43,7 @@ public class HookTest extends AbstractAppTest {
     app.addErrorHandler(new ErrorHandler() {
       @Override
       public void onError(int status, Request request, Throwable t) {
-        queue.offer(status + " " + request.getRequestURI() + " " + t);
+        queue.offer(status + " " + request.getMethod() + " " + request.getRequestURI() + " " + t);
       }
     });
 
@@ -53,7 +53,7 @@ public class HookTest extends AbstractAppTest {
     catch (IOException e) {
     }
 
-    Assert.assertEquals("404 /unknown null", queue.poll(1, TimeUnit.SECONDS));
+    Assert.assertEquals("404 GET /unknown null", queue.poll(1, TimeUnit.SECONDS));
 
     try {
       client.get("/barf");
@@ -61,7 +61,7 @@ public class HookTest extends AbstractAppTest {
     catch (IOException e) {
     }
 
-    Assert.assertEquals("500 /barf java.lang.RuntimeException: barf",
+    Assert.assertEquals("500 GET /barf java.lang.RuntimeException: barf",
                         queue.poll(1, TimeUnit.SECONDS));
 
     Assert.assertEquals("root", client.get("/"));
@@ -78,17 +78,17 @@ public class HookTest extends AbstractAppTest {
                             Method method,
                             Object[] args,
                             Object result) {
-        queue.offer(r.getRequestURI() + " " + method.getName() +
-                    Arrays.toString(args) + " " + result);
+        queue.offer(r.getMethod() + " " + r.getRequestURI() + " " 
+                    + method.getName() + Arrays.toString(args) + " " + result);
       }
     });
 
     client.get("/hello/world");
 
-    Assert.assertEquals("/hello/world getOk[world] Hello world",
+    Assert.assertEquals("GET /hello/world getOk[world] Hello world",
                         queue.poll(1, TimeUnit.SECONDS));
 
     Assert.assertEquals("root", client.get("/"));
-    Assert.assertEquals("/ root[] root", queue.poll(1, TimeUnit.SECONDS));
+    Assert.assertEquals("GET / root[] root", queue.poll(1, TimeUnit.SECONDS));
   }
 }
