@@ -48,7 +48,7 @@ public class GetCurrentLoginTest extends AbstractAppTest {
 
     if (login.equals("foo") && pass.equals("bar")) {
       app.loginUser(login);
-      // unintuitive but the login request does not contains the cookie
+      // unintuitive but the login request does not contain the cookie
       assertNull(app.getCurrentLogin());
       return app.redirect("/app");
     }
