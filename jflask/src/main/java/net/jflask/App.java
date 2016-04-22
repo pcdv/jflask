@@ -398,10 +398,15 @@ public class App {
   /**
    * Returns the login bound with current request (i.e. the one that has been
    * associated with session using {@link #loginUser(String)}.
+   * @return current request login, null if none
    */
   public String getCurrentLogin() {
     String token = getCookie(((SunRequest) getRequest()).getExchange(),
                              sessionTokenCookie);
+    if (token == null)
+      return null;
+
+    // method below will fail if we have a token BUT user is unknown or logged out
     return sessionManager.getLogin(token);
   }
 
