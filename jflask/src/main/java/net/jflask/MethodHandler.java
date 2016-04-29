@@ -70,7 +70,7 @@ public class MethodHandler implements Comparable<MethodHandler> {
     this.tok = uri.isEmpty() ? EMPTY : uri.substring(1).split("/");
     this.idx = calcIndexes(tok);
 
-    if (method.getDeclaredAnnotation(LoginPage.class) != null)
+    if (method.getAnnotation(LoginPage.class) != null)
       ctx.app.setLoginPage(ctx.getRootURI() + uri);
 
     configure();
@@ -117,10 +117,10 @@ public class MethodHandler implements Comparable<MethodHandler> {
    * require adaptation in handlers.
    */
   public void configure() {
-    if (method.getDeclaredAnnotation(LoginRequired.class) != null)
+    if (method.getAnnotation(LoginRequired.class) != null)
       loginRequired = true;
-    else if (method.getDeclaredAnnotation(LoginNotRequired.class) != null ||
-             method.getDeclaredAnnotation(LoginPage.class) != null)
+    else if (method.getAnnotation(LoginNotRequired.class) != null ||
+             method.getAnnotation(LoginPage.class) != null)
       loginRequired = false;
     else
       loginRequired = ctx.app.getRequireLoggedInByDefault();
