@@ -5,14 +5,23 @@ import java.io.IOException;
 import net.jflask.App;
 import net.jflask.sun.WebServer;
 import net.jflask.test.util.SimpleClient;
+import net.jflask.test.util.ThreadState;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 
 public class AbstractAppTest {
 
   protected App app;
 
   protected SimpleClient client;
+
+  /**
+   * Checks that the test did not leave behind any running thread.
+   */
+  @Rule
+  public ThreadState.ThreadStateRule noZombies =
+      new ThreadState.ThreadStateRule();
 
   @Before
   public void setUp() throws IOException {
@@ -44,6 +53,7 @@ public class AbstractAppTest {
   @After
   public void tearDown() {
     app.destroy();
+    app.getServer().close();
   }
 
 }
