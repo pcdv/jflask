@@ -1,26 +1,30 @@
+plugins {
+  id "com.jfrog.bintray" version "1.7"
+}
+
 apply plugin: 'eclipse'
 apply plugin: 'idea'
 
 subprojects {
-    apply plugin: 'java'
+  apply plugin: 'java'
 
-    project.sourceCompatibility = targetCompatibility = 1.7
+  project.sourceCompatibility = targetCompatibility = 1.7
 
-    version = "0.27"
+  version = "${jflask_version}" // see gradle.properties
 
-    repositories {
-         mavenCentral()
+  repositories {
+    mavenCentral()
+  }
+
+  dependencies {
+    testCompile "junit:junit:4.11"
+  }
+
+  eclipse {
+    classpath {
+      defaultOutputDir = file('classes')
     }
-
-    dependencies {
-        testCompile "junit:junit:4.11"
-    }
-
-    eclipse {
-      classpath {
-        defaultOutputDir = file('classes')
-      }
-    }
+  }
 }
 
 project(':jflask') {

@@ -1,0 +1,42 @@
+apply plugin: 'com.jfrog.bintray'
+apply plugin: 'maven-publish'
+
+bintray {
+  user = System.getenv('BINTRAY_USER')
+  key = System.getenv('BINTRAY_KEY')
+  publications = ['MyPublication']
+  publish = true
+
+  pkg {
+    repo = 'maven'
+    name = 'jflask'
+    userOrg = System.getenv('BINTRAY_USER')
+    licenses = ['MIT']
+    vcsUrl = 'https://github.com/pcdv/jflask.git'
+    version {
+      name = "${jflask_version}"
+      desc = 'JFlask micro web framework ${jflask_version}'
+      released = new Date()
+    }
+  }
+}
+
+
+publishing {
+  publications {
+    MyPublication(MavenPublication) {
+      from components.java
+      groupId 'net.jflask'
+      artifactId 'jflask'
+      version "${version}"
+
+      artifact sourceJar {
+        classifier "sources"
+      }
+    }
+  }
+}
+
+task sourceJar(type: Jar) {
+  from sourceSets.main.allJava
+}
