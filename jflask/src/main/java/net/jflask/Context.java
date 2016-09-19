@@ -68,12 +68,8 @@ public class Context implements HttpHandler, RequestHandler {
           return;
         }
       }
-      Log.warn("No handler found for: " + r.getRequestMethod() + " " +
-               req.getRequestURI());
 
-      app.fireError(404, req, null);
-
-      r.sendResponseHeaders(404, 0);
+      app.on404(req);
     }
     catch (Throwable t) {
 

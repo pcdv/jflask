@@ -6,3 +6,6 @@ build
 /bin
 .idea
 *.iml
+classes
+jflask.ipr
+jflask.iws

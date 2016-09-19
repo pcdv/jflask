@@ -82,7 +82,7 @@ public class App {
   private final ThreadLocal<SunRequest> localRequest = new ThreadLocal<>();
 
   private final Map<String, ResponseConverter<?>> converters =
-      new Hashtable<>();
+    new Hashtable<>();
 
   private String loginPage;
 
@@ -97,6 +97,8 @@ public class App {
   private Vector<ErrorHandler> errorHandlers = new Vector<>();
 
   private Vector<SuccessHandler> successHandlers = new Vector<>();
+
+  private UnknownPageHandler unknownPageHandler;
 
   public App() {
     this(8080);
@@ -172,7 +174,7 @@ public class App {
 //      rest.append('/');
 
     MethodHandler handler =
-        getContext(root.toString()).addHandler(rest.toString(), route, m, obj);
+      getContext(root.toString()).addHandler(rest.toString(), route, m, obj);
 
     allHandlers.add(handler);
   }
@@ -229,11 +231,11 @@ public class App {
 
   /**
    * @deprecated The port is now set in the WebServer instance, that may be
-   *             shared between multiple App instances. Either set the port
-   *             at App/WebServer creation:
-   *             <code>new App(new WebServer(port, executor))</code>
-   *             or set it directly on the server:
-   *             <code>app.getServer().setPort()</code>
+   * shared between multiple App instances. Either set the port
+   * at App/WebServer creation:
+   * <code>new App(new WebServer(port, executor))</code>
+   * or set it directly on the server:
+   * <code>app.getServer().setPort()</code>
    */
   @Deprecated
   public void setPort(int port) {
@@ -272,11 +274,8 @@ public class App {
     File file = new File(path);
     AbstractResourceHandler h;
     if (file.exists() && file.isDirectory())
-      h = new FileHandler(this,
-                          mime,
-                          makeAbsoluteUrl(rootURI),
-                          file,
-                          restricted);
+      h =
+        new FileHandler(this, mime, makeAbsoluteUrl(rootURI), file, restricted);
     else
       h = new ResourceHandler(this,
                               mime,
@@ -316,7 +315,7 @@ public class App {
 
   public App serveDir(String rootURI, File dir, boolean restricted) {
     FileHandler h =
-        new FileHandler(this, mime, makeAbsoluteUrl(rootURI), dir, restricted);
+      new FileHandler(this, mime, makeAbsoluteUrl(rootURI), dir, restricted);
 
     handlers.put(rootURI, h);
     if (started)
@@ -398,11 +397,12 @@ public class App {
   /**
    * Returns the login bound with current request (i.e. the one that has been
    * associated with session using {@link #loginUser(String)}.
+   *
    * @return current request login, null if none
    */
   public String getCurrentLogin() {
-    String token = getCookie(((SunRequest) getRequest()).getExchange(),
-                             sessionTokenCookie);
+    String token =
+      getCookie(((SunRequest) getRequest()).getExchange(), sessionTokenCookie);
     if (token == null)
       return null;
 
@@ -572,5 +572,30 @@ public class App {
     for (SuccessHandler successHandler : successHandlers) {
       successHandler.onSuccess(r, method, args, res);
     }
+  }
+
+  void on404(SunRequest r) throws IOException {
+
+    if (unknownPageHandler != null)
+      unknownPageHandler.handle(r);
+
+    else {
+
+      Log.warn("No handler found for: " + r.getMethod() + " " + r.getRequestURI());
+
+      fireError(404, r, null);
+
+      r.getExchange().sendResponseHeaders(404, 0);
+    }
+  }
+
+  /**
+   * Experimental. Allows to handle a request for an URL with no handler. Requires
+   * a root handler to be set somewhere (i.e. Route("/").
+   * 
+   * @param unknownPageHandler
+   */
+  public void setUnknownPageHandler(UnknownPageHandler unknownPageHandler) {
+    this.unknownPageHandler = unknownPageHandler;
   }
 }
