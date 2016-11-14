@@ -54,5 +54,10 @@ Requirements
 ------------
  - JRE 7 (or later)
 
-
+Installation
+------------
+JFlask is available on jcenter.
+```
+  compile "net.jflask:jflask:0.28"
+```
 
