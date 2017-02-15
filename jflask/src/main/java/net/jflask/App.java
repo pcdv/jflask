@@ -445,8 +445,7 @@ public class App {
    * it. Otherwise a 403 error is returned.
    */
   public boolean checkLoggedIn(HttpExchange r) throws IOException {
-    String token = getCookie(r, sessionTokenCookie);
-    if (token != null && sessionManager.isTokenValid(token)) {
+    if (isLoggedIn(r)) {
       return true;
     }
     else {
@@ -462,6 +461,20 @@ public class App {
       }
       return false;
     }
+  }
+
+  /**
+   * Can be called from a request handler to determine whether current
+   * session is authenticated.
+   */
+  public boolean isLoggedIn() {
+    HttpExchange r = ((SunRequest) getRequest()).getExchange();
+    return isLoggedIn(r);
+  }
+
+  private boolean isLoggedIn(HttpExchange r) {
+    String token = getCookie(r, sessionTokenCookie);
+    return (token != null && sessionManager.isTokenValid(token));
   }
 
   private String getCookie(HttpExchange r, String name) {
@@ -581,7 +594,8 @@ public class App {
 
     else {
 
-      Log.warn("No handler found for: " + r.getMethod() + " " + r.getRequestURI());
+      Log.warn(
+        "No handler found for: " + r.getMethod() + " " + r.getRequestURI());
 
       fireError(404, r, null);
 
@@ -590,10 +604,9 @@ public class App {
   }
 
   /**
-   * Experimental. Allows to handle a request for an URL with no handler. Requires
+   * Experimental. Allows to handle a request for an URL with no handler.
+   * Requires
    * a root handler to be set somewhere (i.e. Route("/").
-   * 
-   * @param unknownPageHandler
    */
   public void setUnknownPageHandler(UnknownPageHandler unknownPageHandler) {
     this.unknownPageHandler = unknownPageHandler;

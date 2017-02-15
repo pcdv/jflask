@@ -15,7 +15,7 @@ bintray {
     vcsUrl = 'https://github.com/pcdv/jflask.git'
     version {
       name = "${jflask_version}"
-      desc = 'JFlask micro web framework ${jflask_version}'
+      desc = "JFlask micro web framework ${jflask_version}"
       released = new Date()
     }
   }
