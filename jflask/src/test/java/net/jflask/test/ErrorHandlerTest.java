@@ -7,6 +7,7 @@ import net.jflask.ErrorHandler;
 import net.jflask.Request;
 import net.jflask.Route;
 import net.jflask.SunRequest;
+import net.jflask.test.util.HttpException;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -31,7 +32,7 @@ public class ErrorHandlerTest extends AbstractAppTest {
         // this is a hack (future version should allow to do it in a clean way)
         HttpExchange ex = ((SunRequest) request).getExchange();
         try {
-          ex.sendResponseHeaders(500, 0);
+          ex.sendResponseHeaders(555, 0);
           ex.getResponseBody().write("hello".getBytes());
           ex.close();
         }
@@ -43,7 +44,8 @@ public class ErrorHandlerTest extends AbstractAppTest {
     try {
       client.get("/");
     }
-    catch (IOException e) {
+    catch (HttpException e) {
+      Assert.assertEquals(555, e.getResponseCode());
       Assert.assertEquals("hello", e.getMessage());
     }
   }

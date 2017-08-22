@@ -1,6 +1,7 @@
 package net.jflask.test.util;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
@@ -9,6 +10,8 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+
+import javax.xml.ws.http.HTTPException;
 
 import net.jflask.sun.WebServer;
 import net.jflask.util.IO;
@@ -46,7 +49,19 @@ public class SimpleClient {
    */
   public String get(String path) throws IOException {
     URL url = new URL(rootUrl + path);
-    return new String(IO.readFully(url.openStream()));
+
+    HttpURLConnection con = (HttpURLConnection) url.openConnection();
+    con.setDoOutput(false);
+
+    // https://stackoverflow.com/questions/4633048/httpurlconnection-reading-response-content-on-403-error
+    con.getResponseCode();
+    InputStream err = con.getErrorStream();
+    if (err != null) {
+      byte[] bytes = IO.readFully(err);
+      throw new HttpException(con.getResponseCode(), new String(bytes));
+    }
+
+    return new String(IO.readFully(con.getInputStream()));
   }
 
   /**
@@ -68,6 +83,7 @@ public class SimpleClient {
   public void addCookie(String name, String value) {
     HttpCookie cookie = new HttpCookie(name, value);
     cookie.setPath("/");
+    cookie.setVersion(0);
     cookies.getCookieStore().add(URI.create(rootUrl), cookie);
   }
 }
