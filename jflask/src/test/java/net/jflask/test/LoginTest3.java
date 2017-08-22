@@ -49,8 +49,6 @@ public class LoginTest3 extends AbstractAppTest {
   @Test
   public void testLogin() throws Exception {
 
-    client.addCookie("session", "foobar");
-
     // good login/password redirects to app
     assertEquals("Welcome", client.post("/login", "login=foo&password=bar"));
 
