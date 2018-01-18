@@ -1,9 +1,10 @@
 JFlask
 ======
 
-JFlask is a micro web framework for Java inspired by [Flask](http://flask.pocoo.org/).
+### JFlask is now deprecated. See [flak](https://github.com/pcdv/flak) instead.
 
-
+JFlask is a micro web framework for Java inspired by Python
+[Flask](http://flask.pocoo.org/).
 
 
 Here is an example of what a small JFlask web app looks like.
@@ -56,8 +57,14 @@ Requirements
 
 Installation
 ------------
-JFlask is available on jcenter.
+JFlask is available on [jcenter](https://bintray.com/paulcdv/maven/jflask#).
 ```
-  compile "net.jflask:jflask:0.28"
+repositories {  
+   jcenter()  
+}
+
+dependencies {
+  compile "net.jflask:jflask:0.29"
+}
 ```
 
